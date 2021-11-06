@@ -17,7 +17,7 @@
 #define IA32_VMX_EXIT_CTLS  0x483
 #define IA32_VMX_ENTRY_CTLS  0x484
 /*
- * struct caapability_info
+ * struct capability_info
  *
  * Represents a single capability (bit number and description).
  * Used by report_capability to output VMX capabilities.
@@ -65,24 +65,60 @@ struct capability_info procbased[21] =
 	{30, "PAUSE Exiting"},                       
 	{31, "Activate Secondary Controls"}
 };
-struct capability_info procbased2[5]=
+struct capability_info procbased2[23]=
 {	
+	{0, "Virtualize APIC Access"},
 	{1, "Enable EPT"},
+	{2, "Descriptor-table Exiting"},
 	{3, "Enable RDTSCP"},
+	{4, "Virtualize x2APIC"},
+	{5, "Enable VPID"},
+	{6, "WBINVD Exiting"},
+	{7, "Unrestricted guest"},
+	{8, "APIC-Register Virtualization"},
 	{9, "Virtual-Interrupt Delivery"},
+	{10, "Pause-loop Exiting"},
 	{11, "RDRAND Exiting"},
-	{16, "RDSEED Exiting"}
+	{12, "Enable INVPCID"},
+	{13, "Enable VM Functions"},
+	{14, "VMCS shadowing"},
+	{15, "Enable ENCLS Exiting"},
+	{16, "RDSEED Exiting"},
+	{17, "Enable PML"},
+	{18, "EPT-Violation #VE"},
+	{19, "Conceal VMX Non-root Operation from Intel PT"},
+	{20, "Enable XSAVES/XRSTORS"},
+	{22, "Mode-based execute control for EPT"},
+	{25, "Use TSC Scaling"}
 
 };
-/*
-struct capability_info exitsctls[1]=
+
+struct capability_info exitsctls[11]=
 {
-	{2, "Interrupt Window"}
+	{2, "Save Debug controls"},
+	{9, "Host Address Space Size"},
+	{12, "Load IA32_PERF_GLOBAL_CTRL"},
+	{15, "Acknowledge interrupt on exit"},
+	{18, "Save IA32_PAT"},
+	{19, "Load IA32_PAT"},
+	{20, "Save IA32_EFER"},
+	{21, "Load IA32_EFER"},
+	{22, "Save VMC-preemption timer value"},
+	{23, "Clear IA32_BNDCFGS"},
+	{24, "Conceal VM exits from Intel PT"}
 };
-struct capability_info entryctls[1]=
+struct capability_info entryctls[9]=
 {
-	{2, "Interrupt Window"}
-};*/
+	{2, "Load Debug controls"},
+	{9, "IA-32e mode guest"},
+	{10, "Entry to SMM"},
+	{11, "Deactivate dual-monitor treatment"},
+	{13, "Load IA32_PERF_GLOBAL_CTRL"},
+	{14, "Load IA32_PAT"},
+	{15, "Load IA32_EFER"},
+	{16, "Load IA32_BNDCFGS"},
+	{17, "Conceal VM entries from Intel PT"}
+};
 
 /*
  * report_capability
@@ -143,9 +179,18 @@ detect_vmx_features(void)
 		rdmsr(IA32_VMX_PROCBASED_CTLS2,lo,hi);
 		pr_info("Secondary Proc Based Controls MSR: 0x%llx\n",
 			(uint64_t)(lo | (uint64_t)hi << 32));
-		report_capability(procbased2,5,lo,hi);
+		report_capability(procbased2,23,lo,hi);
 	}
-
+	/*VM-Exit based Controls*/
+	rdmsr(IA32_VMX_EXIT_CTLS,lo,hi);
+	pr_info("VM-Exit Controls MSR: 0x%llx\n",
+		(uint64_t)(lo | (uint64_t)hi << 32));
+        report_capability(exitsctls, 11, lo, hi);
+	/*VM-Exit based Controls*/
+	rdmsr(IA32_VMX_ENTRY_CTLS,lo,hi);
+	pr_info("VM-Entry Controls MSR: 0x%llx\n",
+		(uint64_t)(lo | (uint64_t)hi << 32));
+	report_capability(entryctls, 9, lo, hi);
 }
 
 /*
