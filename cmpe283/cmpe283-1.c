@@ -123,7 +123,7 @@ void
 detect_vmx_features(void)
 {
 	uint32_t lo, hi;
-
+	bool isSecondaryActive=false;
 	/* Pinbased controls */
 	rdmsr(IA32_VMX_PINBASED_CTLS, lo, hi);
 	pr_info("Pinbased Controls MSR: 0x%llx\n",
@@ -136,11 +136,16 @@ detect_vmx_features(void)
 		(uint64_t)(lo | (uint64_t)hi << 32));
 	report_capability(procbased, 21, lo, hi);
 
-	/*Secondary Procbased Controls*/
-	rdmsr(IA32_VMX_PROCBASED_CTLS2,lo,hi);
-	pr_info("Proc Based Controls MSR: 0x%llx\n",
-		(uint64_t)(lo | (uint64_t)hi << 32));
-	/*report_capability(*/
+	isSecondaryActive=(hi>>31&1);
+	/*pr_info("secondary Proc Based Controls: %s",isSecondaryActive?"true":"false");*/
+	if(isSecondaryActive){
+		/*Secondary Procbased Controls*/
+		rdmsr(IA32_VMX_PROCBASED_CTLS2,lo,hi);
+		pr_info("Secondary Proc Based Controls MSR: 0x%llx\n",
+			(uint64_t)(lo | (uint64_t)hi << 32));
+		report_capability(procbased2,5,lo,hi);
+	}
+
 }
 
 /*
