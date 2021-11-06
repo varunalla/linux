@@ -78,13 +78,19 @@ $ cp /boot/config-$(uname -r) .config
 $ make oldconfig
 ```
 ## Building and Installing Kernel:
-Build the linux kernel along with modules and install
+1. Build the linux kernel along with modules and install
 ```
 sudo make modules -j 8
 sudo make -j 8 
 sudo make INSTALL_MOD_STRIP=1 modules_install -j 8
 sudo make install -j 8
 ```
+2. Restart and run the following command.
+```
+$ uname -a
+```
+3. the result should look like the image below.
+![cmpe283-1-uname-after](cmpe283/cmpe283-1-uname-after.png)
 ## Building Custom Module:
 Build the module
 ```
