@@ -67,7 +67,7 @@ $ sudo apt-get install flex bison libelf-dev
 ```
 ## Clone Repo:
 1. Configure Git
-2. clone the git
+2. Clone the repo.
 ```
 $ git clone git@github.com:varunalla/linux.git
 ```
