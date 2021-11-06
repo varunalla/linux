@@ -41,6 +41,49 @@ struct capability_info pinbased[5] =
 	{ 7, "Process Posted Interrupts" }
 };
 
+struct capability_info procbased[21] =
+{
+	{2, "Interrupt-window Exiting"},
+	{3, "Use TSC Offsetting"},
+	{7, "HLT Exiting"},
+	{9, "INVLPG Exiting"},
+	{10, "MWAIT Exiting"},
+	{11, "RDPMC Exiting"},
+	{12, "RDTSC Exiting"},
+	{15, "CR3-Load Exiting"},
+	{16, "CR3-Store Exiting"},
+	{19, "CR8-Load Exiting"},
+	{20, "CR8-Store Exiting"},
+	{21, "Use TPR Shadow"},
+	{22, "NMI-Window Exiting"},
+	{23, "MOV-DR Exiting"},
+	{24, "Unconditional I/O Exiting"},
+	{25, "Use I/O bitmaps"},	
+	{27, "Monitor trap flag"},
+	{28, "use MSR bitmaps"},
+	{29, "MONITOR Exiting"},
+	{30, "PAUSE Exiting"},                       
+	{31, "Activate Secondary Controls"}
+};
+struct capability_info procbased2[5]=
+{	
+	{1, "Enable EPT"},
+	{3, "Enable RDTSCP"},
+	{9, "Virtual-Interrupt Delivery"},
+	{11, "RDRAND Exiting"},
+	{16, "RDSEED Exiting"}
+
+};
+/*
+struct capability_info exitsctls[1]=
+{
+	{2, "Interrupt Window"}
+};
+struct capability_info entryctls[1]=
+{
+	{2, "Interrupt Window"}
+};*/
+
 /*
  * report_capability
  *
@@ -53,9 +96,7 @@ struct capability_info pinbased[5] =
  *  lo: low 32 bits of capability MSR value describing this feature
  *  hi: high 32 bits of capability MSR value describing this feature
  */
-void
-report_capability(struct capability_info *cap, uint8_t len, uint32_t lo,
-    uint32_t hi)
+void report_capability(struct capability_info *cap, uint8_t len, uint32_t lo, uint32_t hi)
 {
 	uint8_t i;
 	struct capability_info *c;
@@ -88,6 +129,18 @@ detect_vmx_features(void)
 	pr_info("Pinbased Controls MSR: 0x%llx\n",
 		(uint64_t)(lo | (uint64_t)hi << 32));
 	report_capability(pinbased, 5, lo, hi);
+	
+	/*Procbased Controls*/
+	rdmsr(IA32_VMX_PROCBASED_CTLS,lo,hi);
+	pr_info("Proc Based Controls MSR: 0x%llx\n",
+		(uint64_t)(lo | (uint64_t)hi << 32));
+	report_capability(procbased, 21, lo, hi);
+
+	/*Secondary Procbased Controls*/
+	rdmsr(IA32_VMX_PROCBASED_CTLS2,lo,hi);
+	pr_info("Proc Based Controls MSR: 0x%llx\n",
+		(uint64_t)(lo | (uint64_t)hi << 32));
+	/*report_capability(*/
 }
 
 /*
