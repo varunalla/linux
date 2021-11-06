@@ -12,7 +12,10 @@
  * See SDM volume 4, section 2.1
  */
 #define IA32_VMX_PINBASED_CTLS	0x481
-
+#define IA32_VMX_PROCBASED_CTLS  0x482
+#define IA32_VMX_PROCBASED_CTLS2  0x48B
+#define IA32_VMX_EXIT_CTLS  0x483
+#define IA32_VMX_ENTRY_CTLS  0x484
 /*
  * struct caapability_info
  *
