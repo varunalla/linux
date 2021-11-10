@@ -43,23 +43,22 @@ $ cp /boot/config-$(uname -r) .config
 $ make oldconfig
 ```
 ## Building and Installing Kernel:
-1. Build the linux kernel along with modules and install
+1. If you run the following command before building and installing the new kernel, it will show old kernel like sample image below.
+```
+$ uname -a
+```
+![unamebefore](cmpe283/unamebefore.png)
+2. Build the linux kernel along with modules and install. Check Cert Error troubleshooting guide below, if error is thrown during build process. 
 ```
 sudo make modules -j 8
 sudo make -j 8 
 sudo make INSTALL_MOD_STRIP=1 modules_install -j 8
 sudo make install -j 8
 ```
-2. If you run the following command before reboot, it will show old kernel like sample image below.
+3. Restart and run the following command. the result should look like the sample image below.
 ```
 $ uname -a
 ```
-![unamebefore](cmpe283/unamebefore.png)
-4. Restart and run the following command.
-```
-$ uname -a
-```
-4. the result should look like the sample image below.
 ![unameafter](cmpe283/unameafter.png)
 ## Building Custom Module:
 Build the module
