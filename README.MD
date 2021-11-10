@@ -50,12 +50,17 @@ sudo make -j 8
 sudo make INSTALL_MOD_STRIP=1 modules_install -j 8
 sudo make install -j 8
 ```
-2. Restart and run the following command.
+2. If you run the following command before reboot, it will show old kernel like sample image below.
 ```
 $ uname -a
 ```
-3. the result should look like the image below.
-![cmpe283-1-uname-after](cmpe283/cmpe283-1-uname-after.png)
+![unamebefore](cmpe283/unamebefore.png)
+4. Restart and run the following command.
+```
+$ uname -a
+```
+4. the result should look like the sample image below.
+![unameafter](cmpe283/unameafter.png)
 ## Building Custom Module:
 Build the module
 ```
