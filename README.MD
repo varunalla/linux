@@ -134,7 +134,7 @@ Enter the password (keep the default path - ~/.ssh/id_rsa)
 ```
 2. Add the public key (~/.ssh/id_rsa.pub) to github account
 
-### Assignment 2:
+# Assignment 2:
 ## Modifications to kvm files.
 1. Modified File lists from cloned linux folder
 ```
