@@ -133,3 +133,57 @@ ssh-keygen
 Enter the password (keep the default path - ~/.ssh/id_rsa)
 ```
 2. Add the public key (~/.ssh/id_rsa.pub) to github account
+
+### Assignment 2:
+## Modifications to kvm files.
+1. Modified File lists from cloned linux folder
+```
+arch/x86/kvm/cpuid.c
+arch/x86/kvm/vmx/vmx.c
+```
+2. Make the modules after modifications
+```
+sudo make -j 8 modules
+sudo make modules_install -j 8
+```
+3. to remove the kvm module and reinject it
+```
+sudo rmmod kvm_intel
+sudo rmmod kvm
+sudo modprobe kvm
+sudo modprobe kvm_intel
+```
+4. To make sure if kvm is loaded or not
+```
+lsmod | grep kvm
+```
+example result is
+```
+kvm_intel             258048  10
+kvm                   876544  1 kvm_intel
+```
+
+## Code to run inside qemu vm
+Follow steps to run vm inside vm in the above section.
+1. Install cpuid package
+```
+sudo apt-get update -y
+sudo apt-get install -y cpuid
+```
+2. Copy the file or create it the file and copy the contents inside the qemu vm
+```
+cmpe283/assignment2/cmpe283-2.c
+```
+3. Compile the file
+```
+gcc cmpe283-2.c
+```
+4. Execute the file
+```
+./a.out
+```
+5. Sample Result
+```
+total exit count is 1847056
+total cpu cycles spent in vmexits  6373159472
+```
