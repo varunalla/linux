@@ -1,0 +1,332 @@
+diff --git a/README.MD b/README.MD
+index fe4cc1602dcd..041f97e33ad5 100644
+--- a/README.MD
++++ b/README.MD
+@@ -133,57 +133,3 @@ ssh-keygen
+ Enter the password (keep the default path - ~/.ssh/id_rsa)
+ ```
+ 2. Add the public key (~/.ssh/id_rsa.pub) to github account
+-
+-### Assignment 2:
+-## Modifications to kvm files.
+-1. Modified File lists from cloned linux folder
+-```
+-arch/x86/kvm/cpuid.c
+-arch/x86/kvm/vmx/vmx.c
+-```
+-2. Make the modules after modifications
+-```
+-sudo make -j 8 modules
+-sudo make modules_install -j 8
+-```
+-3. to remove the kvm module and reinject it
+-```
+-sudo rmmod kvm_intel
+-sudo rmmod kvm
+-sudo modprobe kvm
+-sudo modprobe kvm_intel
+-```
+-4. To make sure if kvm is loaded or not
+-```
+-lsmod | grep kvm
+-```
+-example result is
+-```
+-kvm_intel             258048  10
+-kvm                   876544  1 kvm_intel
+-```
+-
+-## Code to run inside qemu vm
+-Follow steps to run vm inside vm in the above section.
+-1. Install cpuid package
+-```
+-sudo apt-get update -y
+-sudo apt-get install -y cpuid
+-```
+-2. Copy the file or create it the file and copy the contents inside the qemu vm
+-```
+-cmpe283/assignment2/cmpe283-2.c
+-```
+-3. Compile the file
+-```
+-gcc cmpe283-2.c
+-```
+-4. Execute the file
+-```
+-./a.out
+-```
+-5. Sample Result
+-```
+-total exit count is 1847056
+-total cpu cycles spent in vmexits  6373159472
+-```
+\ No newline at end of file
+diff --git a/arch/x86/kvm/cpuid.c b/arch/x86/kvm/cpuid.c
+index f7ac74efa907..751aa85a3001 100644
+--- a/arch/x86/kvm/cpuid.c
++++ b/arch/x86/kvm/cpuid.c
+@@ -8,6 +8,7 @@
+  * Copyright 2011 Red Hat, Inc. and/or its affiliates.
+  * Copyright IBM Corporation, 2008
+  */
++
+ #include <linux/kvm_host.h>
+ #include <linux/export.h>
+ #include <linux/vmalloc.h>
+@@ -30,10 +31,7 @@
+  */
+ u32 kvm_cpu_caps[NR_KVM_CPU_CAPS] __read_mostly;
+ EXPORT_SYMBOL_GPL(kvm_cpu_caps);
+-u32 total_exits;
+-EXPORT_SYMBOL_GPL(total_exits);
+-u64 totaltime;
+-EXPORT_SYMBOL_GPL(totaltime);
++
+ static u32 xstate_required_size(u64 xstate_bv, bool compacted)
+ {
+ 	int feature_bit = 0;
+@@ -1227,25 +1225,13 @@ EXPORT_SYMBOL_GPL(kvm_cpuid);
+ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
+ {
+ 	u32 eax, ebx, ecx, edx;
+-	
++
+ 	if (cpuid_fault_enabled(vcpu) && !kvm_require_cpl(vcpu, 0))
+ 		return 1;
+ 
+ 	eax = kvm_rax_read(vcpu);
+-	/*pr_info("cpuid exit \n");*/
+-	if(eax==0x4fffffff){
+-			eax=total_exits;
+-			pr_info("total exits: %d\n",total_exits);
+-	}
+-	else if(eax==0x4ffffffe){
+-			ebx = (u32)((totaltime & 0xFFFFFFFF00000000LL) >> 32);
+-		    ecx = (u32)(totaltime & 0xFFFFFFFFLL);
+-			pr_info("total cpu time spent for vmexits in cycle: %lld\n",totaltime);
+-	}
+-	else{
+-		ecx = kvm_rcx_read(vcpu);
+-		kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
+-	}
++	ecx = kvm_rcx_read(vcpu);
++	kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
+ 	kvm_rax_write(vcpu, eax);
+ 	kvm_rbx_write(vcpu, ebx);
+ 	kvm_rcx_write(vcpu, ecx);
+diff --git a/arch/x86/kvm/vmx/vmx.c b/arch/x86/kvm/vmx/vmx.c
+index 20c877537825..7d595effb66f 100644
+--- a/arch/x86/kvm/vmx/vmx.c
++++ b/arch/x86/kvm/vmx/vmx.c
+@@ -5883,26 +5883,18 @@ void dump_vmcs(struct kvm_vcpu *vcpu)
+ 		pr_err("Virtual processor ID = 0x%04x\n",
+ 		       vmcs_read16(VIRTUAL_PROCESSOR_ID));
+ }
+-extern u32 total_exits;
+-extern u64 totaltime;
+-static void __add_exit_time(u64 startTime){
+-	u64 endTime=rdtsc();
+-	totaltime+=endTime-startTime;
+-}
++
+ /*
+  * The guest has exited.  See if we can fix it or if we need userspace
+  * assistance.
+  */
+ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
+ {
+-	int response;
+-	u64 start=rdtsc();
+ 	struct vcpu_vmx *vmx = to_vmx(vcpu);
+ 	union vmx_exit_reason exit_reason = vmx->exit_reason;
+ 	u32 vectoring_info = vmx->idt_vectoring_info;
+ 	u16 exit_handler_index;
+-	total_exits++;
+-	
++
+ 	/*
+ 	 * Flush logged GPAs PML buffer, this will make dirty_bitmap more
+ 	 * updated. Another good is, in kvm_vm_ioctl_get_dirty_log, before
+@@ -5920,17 +5912,12 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
+ 	 * below) should never happen as that means we incorrectly allowed a
+ 	 * nested VM-Enter with an invalid vmcs12.
+ 	 */
+-	if (KVM_BUG_ON(vmx->nested.nested_run_pending, vcpu->kvm)){
+-		__add_exit_time(start);
++	if (KVM_BUG_ON(vmx->nested.nested_run_pending, vcpu->kvm))
+ 		return -EIO;
+-	}	
+ 
+ 	/* If guest state is invalid, start emulating */
+-	if (vmx->emulation_required){
+-		response=handle_invalid_guest_state(vcpu);
+-		__add_exit_time(start);
+-		return response;
+-	}
++	if (vmx->emulation_required)
++		return handle_invalid_guest_state(vcpu);
+ 
+ 	if (is_guest_mode(vcpu)) {
+ 		/*
+@@ -5953,10 +5940,8 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
+ 		 */
+ 		nested_mark_vmcs12_pages_dirty(vcpu);
+ 
+-		if (nested_vmx_reflect_vmexit(vcpu)){
+-			__add_exit_time(start);
++		if (nested_vmx_reflect_vmexit(vcpu))
+ 			return 1;
+-		}
+ 	}
+ 
+ 	if (exit_reason.failed_vmentry) {
+@@ -5965,7 +5950,6 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
+ 		vcpu->run->fail_entry.hardware_entry_failure_reason
+ 			= exit_reason.full;
+ 		vcpu->run->fail_entry.cpu = vcpu->arch.last_vmentry_cpu;
+-		__add_exit_time(start);
+ 		return 0;
+ 	}
+ 
+@@ -5975,7 +5959,6 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
+ 		vcpu->run->fail_entry.hardware_entry_failure_reason
+ 			= vmcs_read32(VM_INSTRUCTION_ERROR);
+ 		vcpu->run->fail_entry.cpu = vcpu->arch.last_vmentry_cpu;
+-		__add_exit_time(start);
+ 		return 0;
+ 	}
+ 
+@@ -6005,7 +5988,6 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
+ 		}
+ 		vcpu->run->internal.data[ndata++] = vcpu->arch.last_vmentry_cpu;
+ 		vcpu->run->internal.ndata = ndata;
+-		__add_exit_time(start);
+ 		return 0;
+ 	}
+ 
+@@ -6028,52 +6010,32 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
+ 		}
+ 	}
+ 
+-	if (exit_fastpath != EXIT_FASTPATH_NONE){
+-		__add_exit_time(start);
++	if (exit_fastpath != EXIT_FASTPATH_NONE)
+ 		return 1;
+-	}
++
+ 	if (exit_reason.basic >= kvm_vmx_max_exit_handlers)
+ 		goto unexpected_vmexit;
+ #ifdef CONFIG_RETPOLINE
+-	if (exit_reason.basic == EXIT_REASON_MSR_WRITE){
+-		response=kvm_emulate_wrmsr(vcpu);
+-		__add_exit_time(start);
+-		return response;
+-	}
+-	else if (exit_reason.basic == EXIT_REASON_PREEMPTION_TIMER){
+-		response=handle_preemption_timer(vcpu);
+-		__add_exit_time(start);
+-		return response;
+-	}
+-	else if (exit_reason.basic == EXIT_REASON_INTERRUPT_WINDOW){
+-		response=handle_interrupt_window(vcpu);
+-		__add_exit_time(start);
+-		return response;
+-	}
+-	else if (exit_reason.basic == EXIT_REASON_EXTERNAL_INTERRUPT){
+-		response=handle_external_interrupt(vcpu);
+-		__add_exit_time(start);
+-		return response;
+-	}	
+-	else if (exit_reason.basic == EXIT_REASON_HLT){
+-		response=kvm_emulate_halt(vcpu);
+-		__add_exit_time(start);
+-		return response;
+-	}
+-	else if (exit_reason.basic == EXIT_REASON_EPT_MISCONFIG){
+-		response=handle_ept_misconfig(vcpu);
+-		__add_exit_time(start);
+-		return response;
+-	}
++	if (exit_reason.basic == EXIT_REASON_MSR_WRITE)
++		return kvm_emulate_wrmsr(vcpu);
++	else if (exit_reason.basic == EXIT_REASON_PREEMPTION_TIMER)
++		return handle_preemption_timer(vcpu);
++	else if (exit_reason.basic == EXIT_REASON_INTERRUPT_WINDOW)
++		return handle_interrupt_window(vcpu);
++	else if (exit_reason.basic == EXIT_REASON_EXTERNAL_INTERRUPT)
++		return handle_external_interrupt(vcpu);
++	else if (exit_reason.basic == EXIT_REASON_HLT)
++		return kvm_emulate_halt(vcpu);
++	else if (exit_reason.basic == EXIT_REASON_EPT_MISCONFIG)
++		return handle_ept_misconfig(vcpu);
+ #endif
+ 
+ 	exit_handler_index = array_index_nospec((u16)exit_reason.basic,
+ 						kvm_vmx_max_exit_handlers);
+ 	if (!kvm_vmx_exit_handlers[exit_handler_index])
+ 		goto unexpected_vmexit;
+-	response=kvm_vmx_exit_handlers[exit_handler_index](vcpu);
+-	__add_exit_time(start);
+-	return response;
++
++	return kvm_vmx_exit_handlers[exit_handler_index](vcpu);
+ 
+ unexpected_vmexit:
+ 	vcpu_unimpl(vcpu, "vmx: unexpected exit reason 0x%x\n",
+@@ -6085,7 +6047,6 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
+ 	vcpu->run->internal.ndata = 2;
+ 	vcpu->run->internal.data[0] = exit_reason.full;
+ 	vcpu->run->internal.data[1] = vcpu->arch.last_vmentry_cpu;
+-	__add_exit_time(start);
+ 	return 0;
+ }
+ 
+diff --git a/cmpe283/assignment2/cmpe283-2.c b/cmpe283/assignment2/cmpe283-2.c
+deleted file mode 100644
+index 042746a8708b..000000000000
+--- a/cmpe283/assignment2/cmpe283-2.c
++++ /dev/null
+@@ -1,42 +0,0 @@
+-#include<stdio.h>
+-#include<stdint.h>
+-
+-void totalExitCount()
+-{
+-        int b;
+-        asm("mov $0x4fffffff,%eax \n\t");
+-        asm("cpuid\n");
+-        asm("mov %%eax, %0\n\t":"=r" (b));
+-        printf("%d\n",b);
+-        
+-}
+-void getTotalTime(){
+-        int32_t ebx,ecx;
+-        int64_t result;
+-        asm("mov $0x4FFFFFFE,%eax \n\t");
+-        asm("cpuid\n");
+-        asm("mov %%ebx, %0\n\t":"=r" (ebx));
+-        asm("mov %%ecx, %0\n\t":"=r" (ecx));
+-        result=((int64_t)ebx)<<32|ecx;
+-        printf("%ld\n",result);
+-}
+-void getCpuID()
+-{
+-    asm("xor %eax , %eax\n\t");
+-    asm("xor %ebx , %ebx\n\t");
+-    asm("xor %ecx , %ecx\n\t");
+-    asm("xor %edx , %edx\n\t");
+-    printf("total exit count is ");
+-    totalExitCount();
+-    asm("xor %eax , %eax\n\t");
+-    asm("xor %ebx , %ebx\n\t");
+-    asm("xor %ecx , %ecx\n\t");
+-    asm("xor %edx , %edx\n\t");
+-    printf("total cpu cycles spent in vmexits  ");
+-    getTotalTime();
+-    printf("\n");
+-}
+-
+-int main(){
+-            getCpuID();
+-}
+\ No newline at end of file
