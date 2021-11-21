@@ -32,6 +32,8 @@ u32 kvm_cpu_caps[NR_KVM_CPU_CAPS] __read_mostly;
 EXPORT_SYMBOL_GPL(kvm_cpu_caps);
 u32 total_exits;
 EXPORT_SYMBOL_GPL(total_exits);
+u64 totaltime;
+EXPORT_SYMBOL_GPL(totaltime);
 static u32 xstate_required_size(u64 xstate_bv, bool compacted)
 {
 	int feature_bit = 0;
@@ -1230,17 +1232,18 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 		return 1;
 
 	eax = kvm_rax_read(vcpu);
-	ecx = kvm_rcx_read(vcpu);
 	/*pr_info("cpuid exit \n");*/
 	if(eax==0x4fffffff){
 			eax=total_exits;
 			pr_info("total exits: %d\n",total_exits);
 	}
 	else if(eax==0x4ffffffe){
-			eax=total_exits;
-			pr_info("total cpu time spent in cycle: %d\n",total_exits);
+			ebx = (u32)((totaltime & 0xFFFFFFFF00000000LL) >> 32);
+		    ecx = (u32)(totaltime & 0xFFFFFFFFLL);
+			pr_info("total cpu time spent for vmexits in cycle: %lld\n",totaltime);
 	}
 	else{
+		ecx = kvm_rcx_read(vcpu);
 		kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
 	}
 	kvm_rax_write(vcpu, eax);
