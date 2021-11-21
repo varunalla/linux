@@ -8,7 +8,6 @@
  * Copyright 2011 Red Hat, Inc. and/or its affiliates.
  * Copyright IBM Corporation, 2008
  */
-
 #include <linux/kvm_host.h>
 #include <linux/export.h>
 #include <linux/vmalloc.h>
@@ -31,7 +30,8 @@
  */
 u32 kvm_cpu_caps[NR_KVM_CPU_CAPS] __read_mostly;
 EXPORT_SYMBOL_GPL(kvm_cpu_caps);
-
+u32 total_exits;
+EXPORT_SYMBOL_GPL(total_exits);
 static u32 xstate_required_size(u64 xstate_bv, bool compacted)
 {
 	int feature_bit = 0;
@@ -1225,14 +1225,20 @@ EXPORT_SYMBOL_GPL(kvm_cpuid);
 int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 {
 	u32 eax, ebx, ecx, edx;
-	extern u32 total_exits;
+	
 	if (cpuid_fault_enabled(vcpu) && !kvm_require_cpl(vcpu, 0))
 		return 1;
 
 	eax = kvm_rax_read(vcpu);
 	ecx = kvm_rcx_read(vcpu);
-	if(eax==0x4ffffffff){
+	/*pr_info("cpuid exit \n");*/
+	if(eax==0x4fffffff){
 			eax=total_exits;
+			pr_info("total exits: %d\n",total_exits);
+	}
+	else if(eax==0x4ffffffe){
+			eax=total_exits;
+			pr_info("total cpu time spent in cycle: %d\n",total_exits);
 	}
 	else{
 		kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);

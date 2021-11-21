@@ -5883,8 +5883,7 @@ void dump_vmcs(struct kvm_vcpu *vcpu)
 		pr_err("Virtual processor ID = 0x%04x\n",
 		       vmcs_read16(VIRTUAL_PROCESSOR_ID));
 }
-u32 total_exits;
-u64 total_time_in_exit;
+extern u32 total_exits;
 /*
  * The guest has exited.  See if we can fix it or if we need userspace
  * assistance.
