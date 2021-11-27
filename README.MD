@@ -105,6 +105,7 @@ screen
 ```
 6. Start the VM using qemu with 8 vcpus and 16GB of memory.
 ```
+$ export img=ubuntu-18.04-server-cloudimg-amd64.img
 $ sudo qemu-system-x86_64 -enable-kvm -drive "file=${img},format=qcow2" -drive "file=${user_data},format=raw"  -m 16G -smp 8 -nographic
 ```
 7. The Systems will say no boot drive not available. wait for a moment and press key when prompted. 
@@ -134,7 +135,7 @@ Enter the password (keep the default path - ~/.ssh/id_rsa)
 ```
 2. Add the public key (~/.ssh/id_rsa.pub) to github account
 
-### Assignment 2:
+# Assignment 2:
 ## Modifications to kvm files.
 1. Modified File lists from cloned linux folder
 ```
