@@ -32,7 +32,12 @@ bool kvm_cpuid(struct kvm_vcpu *vcpu, u32 *eax, u32 *ebx,
 
 int cpuid_query_maxphyaddr(struct kvm_vcpu *vcpu);
 u64 kvm_vcpu_reserved_gpa_bits_raw(struct kvm_vcpu *vcpu);
-
+struct VM_EXIT_COUNTER {
+   bool isImplemented;
+   bool isValid; //is present in sdm
+   u32 vmexit_count;
+   u64 cycle_count; 
+};   
 static inline int cpuid_maxphyaddr(struct kvm_vcpu *vcpu)
 {
 	return vcpu->arch.maxphyaddr;

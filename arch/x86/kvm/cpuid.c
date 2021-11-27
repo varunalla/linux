@@ -34,6 +34,86 @@ u32 total_exits;
 EXPORT_SYMBOL_GPL(total_exits);
 u64 totaltime;
 EXPORT_SYMBOL_GPL(totaltime);
+
+struct VM_EXIT_COUNTER vmexitcounter[75] = {
+	[EXIT_REASON_EXCEPTION_NMI]       = {true,true,0,0}, //0 vmx.c exit handlers array
+	[EXIT_REASON_EXTERNAL_INTERRUPT]      = {true,true,0,0}, //1 vmx.c exit handlers array
+	[EXIT_REASON_TRIPLE_FAULT]            = {true,true,0,0}, //2 vmx.c exit handlers array
+	[EXIT_REASON_INIT_SIGNAL]			  =	{true,true,0,0}, //3  nested.c nested vmx exit
+    [EXIT_REASON_SIPI_SIGNAL]			  = {true,true,0,0}, //4  nested.c nested vmx exit
+	[5]		          = {false,true,0,0}, //5 present in sdm but not implemented
+	[6]               = {false,true,0,0}, //6 present in sdm but not implemented
+	[EXIT_REASON_INTERRUPT_WINDOW]        = {true,true,0,0}, //7 vmx.c exit handlers array
+	[EXIT_REASON_NMI_WINDOW]	          = {true,true,0,0}, //8 vmx.c exit handlers array
+	[EXIT_REASON_TASK_SWITCH]             = {true,true,0,0}, //9 vmx.c exit handlers array
+	[EXIT_REASON_CPUID]                   = {true,true,0,0}, //10 vmx.c exit handlers array
+	[11]		      	  = {false,true,0,0}, //11 present in sdm but not implemented
+	[EXIT_REASON_HLT]                     = {true,true,0,0}, //12 vmx.c exit handlers array
+	[EXIT_REASON_INVD]		      		  = {true,true,0,0}, //13 vmx.c exit handlers array
+	[EXIT_REASON_INVLPG]		      	  = {true,true,0,0}, //14 vmx.c exit handlers array
+	[EXIT_REASON_RDPMC]                   = {true,true,0,0}, //15 vmx.c exit handlers array
+    [EXIT_REASON_RDTSC] 				  = {true,true,0,0}, //16 nested.c nested vmx exit
+	[17]                	  = {false,true,0,0},//17 present in sdm but not implemented
+	[EXIT_REASON_VMCALL]                  = {true,true,0,0}, //18 vmx.c exit handlers array
+	[EXIT_REASON_VMCLEAR]		          = {true,true,0,0}, //19 vmx.c exit handlers array
+	[EXIT_REASON_VMLAUNCH]		          = {true,true,0,0}, //20 vmx.c exit handlers array
+	[EXIT_REASON_VMPTRLD]		          = {true,true,0,0}, //21 vmx.c exit handlers array
+	[EXIT_REASON_VMPTRST]		          = {true,true,0,0}, //22 vmx.c exit handlers array
+	[EXIT_REASON_VMREAD]		          = {true,true,0,0}, //23 vmx.c exit handlers array
+	[EXIT_REASON_VMRESUME]		          = {true,true,0,0}, //24 vmx.c exit handlers array
+	[EXIT_REASON_VMWRITE]		          = {true,true,0,0}, //25 vmx.c exit handlers array
+	[EXIT_REASON_VMOFF]		              = {true,true,0,0}, //26 vmx.c exit handlers array
+	[EXIT_REASON_VMON]		              = {true,true,0,0}, //27 vmx.c exit handlers array
+	[EXIT_REASON_CR_ACCESS]               = {true,true,0,0}, //28 vmx.c exit handlers array
+	[EXIT_REASON_DR_ACCESS]               = {true,true,0,0}, //29 vmx.c exit handlers array
+	[EXIT_REASON_IO_INSTRUCTION]          = {true,true,0,0}, //30 vmx.c exit handlers array
+	[EXIT_REASON_MSR_READ]                = {true,true,0,0}, //31 vmx.c exit handlers array
+	[EXIT_REASON_MSR_WRITE]               = {true,true,0,0}, //32 vmx.c exit handlers array
+    [EXIT_REASON_INVALID_STATE]           = {true,true,0,0}, //33 vmx.c and nested.c nested vm
+  	[EXIT_REASON_MSR_LOAD_FAIL]			  = {true,true,0,0}, //34 nested.c nested vmx exit
+	  [35] ={false,false,0,0}, // not present and not implemented
+	[EXIT_REASON_MWAIT_INSTRUCTION]	      = {true,true,0,0}, //36 vmx.c exit handlers array
+	[EXIT_REASON_MONITOR_TRAP_FLAG]       = {true,true,0,0}, //37 vmx.c exit handlers array
+	[38]={false,false,0,0}, //38 not present and not implemented
+	[EXIT_REASON_MONITOR_INSTRUCTION]     = {true,true,0,0}, //39 vmx.c exit handlers array
+	[EXIT_REASON_PAUSE_INSTRUCTION]       = {true,true,0,0}, //40 vmx.c exit handlers array
+    [EXIT_REASON_MCE_DURING_VMENTRY]      = {true,true,0,0}, //41 vmx.c exit handlers array
+	[42]={false,false,0,0}, //42  not present and not implemented
+    [EXIT_REASON_TPR_BELOW_THRESHOLD]     = {true,true,0,0}, //43 vmx.c exit handlers array
+    [EXIT_REASON_APIC_ACCESS]             = {true,true,0,0}, //44 vmx.c exit handlers array
+    [EXIT_REASON_EOI_INDUCED]             = {true,true,0,0},	//45 vmx.c exit handlers array
+	[EXIT_REASON_GDTR_IDTR]		      	  = {true,true,0,0}, //46 vmx.c exit handlers array
+	[EXIT_REASON_LDTR_TR]		      	  = {true,true,0,0}, //47 vmx.c exit handlers array
+	[EXIT_REASON_EPT_VIOLATION]	      	  = {true,true,0,0}, //48 vmx.c exit handlers array
+	[EXIT_REASON_EPT_MISCONFIG]           = {true,true,0,0}, //49 vmx.c exit handlers array
+	[EXIT_REASON_INVEPT]                  = {true,true,0,0}, //50 vmx.c exit handlers array
+	[EXIT_REASON_RDTSCP]				  = {true,true,0,0}, //51 nested.c
+	[EXIT_REASON_PREEMPTION_TIMER]	      = {true,true,0,0}, //52 vmx.c exit handlers array
+	[EXIT_REASON_INVVPID]                 = {true,true,0,0}, //53 vmx.c exit handlers array
+	[EXIT_REASON_WBINVD]                  = {true,true,0,0}, //54 vmx.c exit handlers array
+	[EXIT_REASON_XSETBV]                  = {true,true,0,0}, //55 vmx.c exit handlers array
+	[EXIT_REASON_APIC_WRITE]              = {true,true,0,0}, //56 vmx.c exit handlers array
+	[EXIT_REASON_RDRAND]                  = {true,true,0,0}, //57 vmx.c exit handlers array
+	[EXIT_REASON_INVPCID]                 = {true,true,0,0}, //58 vmx.c exit handlers array
+	[EXIT_REASON_VMFUNC]		      	  = {true,true,0,0}, //59 vmx.c exit handlers array
+	[EXIT_REASON_ENCLS]		              = {true,true,0,0}, //60 vmx.c exit handlers array
+	[EXIT_REASON_RDSEED]                  = {true,true,0,0}, //61 vmx.c exit handlers array
+	[EXIT_REASON_PML_FULL]		          = {true,true,0,0}, //62 vmx.c exit handlers array
+	[EXIT_REASON_XSAVES]                  = {true,true,0,0}, //63 nested.c
+	[EXIT_REASON_XRSTORS]                 = {true,true,0,0}, //64 nested.c
+	[65]={false,false,0,0}, // not present and not implemented
+	[66]		      = {false,true,0,0}, //66 present in sdm not implemented
+	[EXIT_REASON_UMWAIT]                  = {true,true,0,0}, //67 nested.c
+	[EXIT_REASON_TPAUSE]                  = {true,true,0,0}, //68 nested.c
+	[69]               = {false,true,0,0}, //69 present in sdm not implemented
+	[70]={false,false,0,0}, // not present and not implemented
+	[71]={false,false,0,0}, // not present and not implemented
+	[72]={false,false,0,0}, // not present and not implemented
+	[73]={false,false,0,0}, // not present and not implemented
+	[EXIT_REASON_BUS_LOCK]                = {true,true,0,0} //74 vmx.c exit handlers array
+};
+EXPORT_SYMBOL_GPL(vmexitcounter);
+
 static u32 xstate_required_size(u64 xstate_bv, bool compacted)
 {
 	int feature_bit = 0;
@@ -1227,7 +1307,7 @@ EXPORT_SYMBOL_GPL(kvm_cpuid);
 int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 {
 	u32 eax, ebx, ecx, edx;
-	
+	int32_t reason;
 	if (cpuid_fault_enabled(vcpu) && !kvm_require_cpl(vcpu, 0))
 		return 1;
 
@@ -1241,6 +1321,69 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 			ebx = (u32)((totaltime & 0xFFFFFFFF00000000LL) >> 32);
 		    ecx = (u32)(totaltime & 0xFFFFFFFFLL);
 			pr_info("total cpu time spent for vmexits in cycle: %lld\n",totaltime);
+	}
+	else if(eax==0x4ffffffd){
+			ecx = kvm_rcx_read(vcpu);
+			// read reason
+			reason=(int32_t) ecx;
+			if(reason<0&&reason>75){
+				//if reason is not within limits
+				eax=0;
+				ecx=0;
+				ebx=0;
+				edx=0x4fffffff;
+			}
+			else if (!vmexitcounter[reason].isValid){
+				//if reason is not in sdm return 0
+				eax=0;
+				ecx=0;
+				ebx=0;
+				edx=0x4fffffff;
+			}
+			else if (!vmexitcounter[reason].isImplemented){
+				//if reason is in sdm but not implemented return 
+				eax=0;
+				ebx=0;
+				ecx=0;
+				edx=0;
+			}
+			else{
+				//if present and implemented return exit count
+				eax=vmexitcounter[reason].vmexit_count;
+			}
+			pr_info("exits for reason %d total exits: %d\n",reason,vmexitcounter[reason].vmexit_count);
+	}
+	else if(eax==0x4ffffffc){
+			ecx = kvm_rcx_read(vcpu);
+			// read reason
+			reason=(int32_t) ecx;
+			if(reason<0&&reason>75){
+				//if reason is not within limits
+				eax=0;
+				ecx=0;
+				ebx=0;
+				edx=0x4fffffff;
+			}
+			else if (!vmexitcounter[reason].isValid){
+				//if reason is not in sdm return 0
+				eax=0;
+				ecx=0;
+				ebx=0;
+				edx=0x4fffffff;
+			}
+			else if (!vmexitcounter[reason].isImplemented){
+				//if reason is in sdm but not implemented return 
+				eax=0;
+				ebx=0;
+				ecx=0;
+				edx=0;
+			}
+			else{
+				//if present and implemented return exit count
+				ebx = (u32)((vmexitcounter[reason].cycle_count & 0xFFFFFFFF00000000LL) >> 32);
+		    	ecx = (u32)(vmexitcounter[reason].cycle_count & 0xFFFFFFFFLL);
+			}
+			pr_info("exits for reason %d total exits: %d\n",reason,vmexitcounter[reason].vmexit_count);
 	}
 	else{
 		ecx = kvm_rcx_read(vcpu);
