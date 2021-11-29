@@ -5885,6 +5885,7 @@ void dump_vmcs(struct kvm_vcpu *vcpu)
 }
 extern u32 total_exits;
 extern u64 totaltime;
+extern u32 totalbasicexits;
 extern struct VM_EXIT_COUNTER vmexitcounter[75]; 
 
 static void __add_exit_time(u64 startTime,u32 reason,bool valid){
@@ -5900,14 +5901,21 @@ static void __add_exit_time(u64 startTime,u32 reason,bool valid){
  */
 static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 {
-	int response;
+	int response,reason;
 	u64 start=rdtsc();
 	struct vcpu_vmx *vmx = to_vmx(vcpu);
 	union vmx_exit_reason exit_reason = vmx->exit_reason;
 	u32 vectoring_info = vmx->idt_vectoring_info;
 	u16 exit_handler_index;
 	total_exits++;
-	vmexitcounter[exit_reason.basic].vmexit_count++;
+	reason=(int)exit_reason.basic;
+	if(reason<0||reason>74){
+		pr_info("random reason :  %d ",reason);
+	}
+	else{
+		totalbasicexits++;
+		vmexitcounter[exit_reason.basic].vmexit_count++;
+	}
 	/*
 	 * Flush logged GPAs PML buffer, this will make dirty_bitmap more
 	 * updated. Another good is, in kvm_vm_ioctl_get_dirty_log, before

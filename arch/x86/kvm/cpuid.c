@@ -13,7 +13,6 @@
 #include <linux/vmalloc.h>
 #include <linux/uaccess.h>
 #include <linux/sched/stat.h>
-
 #include <asm/processor.h>
 #include <asm/user.h>
 #include <asm/fpu/xstate.h>
@@ -30,87 +29,143 @@
  */
 u32 kvm_cpu_caps[NR_KVM_CPU_CAPS] __read_mostly;
 EXPORT_SYMBOL_GPL(kvm_cpu_caps);
-u32 total_exits;
+u32 total_exits = 0;
 EXPORT_SYMBOL_GPL(total_exits);
-u64 totaltime;
+u64 totaltime = 0;
 EXPORT_SYMBOL_GPL(totaltime);
-
+u32 totalbasicexits;
+EXPORT_SYMBOL_GPL(totalbasicexits);
 struct VM_EXIT_COUNTER vmexitcounter[75] = {
-	[EXIT_REASON_EXCEPTION_NMI]       = {true,true,0,0}, //0 vmx.c exit handlers array
-	[EXIT_REASON_EXTERNAL_INTERRUPT]      = {true,true,0,0}, //1 vmx.c exit handlers array
-	[EXIT_REASON_TRIPLE_FAULT]            = {true,true,0,0}, //2 vmx.c exit handlers array
-	[EXIT_REASON_INIT_SIGNAL]			  =	{true,true,0,0}, //3  nested.c nested vmx exit
-    [EXIT_REASON_SIPI_SIGNAL]			  = {true,true,0,0}, //4  nested.c nested vmx exit
-	[5]		          = {false,true,0,0}, //5 present in sdm but not implemented
-	[6]               = {false,true,0,0}, //6 present in sdm but not implemented
-	[EXIT_REASON_INTERRUPT_WINDOW]        = {true,true,0,0}, //7 vmx.c exit handlers array
-	[EXIT_REASON_NMI_WINDOW]	          = {true,true,0,0}, //8 vmx.c exit handlers array
-	[EXIT_REASON_TASK_SWITCH]             = {true,true,0,0}, //9 vmx.c exit handlers array
-	[EXIT_REASON_CPUID]                   = {true,true,0,0}, //10 vmx.c exit handlers array
-	[11]		      	  = {false,true,0,0}, //11 present in sdm but not implemented
-	[EXIT_REASON_HLT]                     = {true,true,0,0}, //12 vmx.c exit handlers array
-	[EXIT_REASON_INVD]		      		  = {true,true,0,0}, //13 vmx.c exit handlers array
-	[EXIT_REASON_INVLPG]		      	  = {true,true,0,0}, //14 vmx.c exit handlers array
-	[EXIT_REASON_RDPMC]                   = {true,true,0,0}, //15 vmx.c exit handlers array
-    [EXIT_REASON_RDTSC] 				  = {true,true,0,0}, //16 nested.c nested vmx exit
-	[17]                	  = {false,true,0,0},//17 present in sdm but not implemented
-	[EXIT_REASON_VMCALL]                  = {true,true,0,0}, //18 vmx.c exit handlers array
-	[EXIT_REASON_VMCLEAR]		          = {true,true,0,0}, //19 vmx.c exit handlers array
-	[EXIT_REASON_VMLAUNCH]		          = {true,true,0,0}, //20 vmx.c exit handlers array
-	[EXIT_REASON_VMPTRLD]		          = {true,true,0,0}, //21 vmx.c exit handlers array
-	[EXIT_REASON_VMPTRST]		          = {true,true,0,0}, //22 vmx.c exit handlers array
-	[EXIT_REASON_VMREAD]		          = {true,true,0,0}, //23 vmx.c exit handlers array
-	[EXIT_REASON_VMRESUME]		          = {true,true,0,0}, //24 vmx.c exit handlers array
-	[EXIT_REASON_VMWRITE]		          = {true,true,0,0}, //25 vmx.c exit handlers array
-	[EXIT_REASON_VMOFF]		              = {true,true,0,0}, //26 vmx.c exit handlers array
-	[EXIT_REASON_VMON]		              = {true,true,0,0}, //27 vmx.c exit handlers array
-	[EXIT_REASON_CR_ACCESS]               = {true,true,0,0}, //28 vmx.c exit handlers array
-	[EXIT_REASON_DR_ACCESS]               = {true,true,0,0}, //29 vmx.c exit handlers array
-	[EXIT_REASON_IO_INSTRUCTION]          = {true,true,0,0}, //30 vmx.c exit handlers array
-	[EXIT_REASON_MSR_READ]                = {true,true,0,0}, //31 vmx.c exit handlers array
-	[EXIT_REASON_MSR_WRITE]               = {true,true,0,0}, //32 vmx.c exit handlers array
-    [EXIT_REASON_INVALID_STATE]           = {true,true,0,0}, //33 vmx.c and nested.c nested vm
-  	[EXIT_REASON_MSR_LOAD_FAIL]			  = {true,true,0,0}, //34 nested.c nested vmx exit
-	  [35] ={false,false,0,0}, // not present and not implemented
-	[EXIT_REASON_MWAIT_INSTRUCTION]	      = {true,true,0,0}, //36 vmx.c exit handlers array
-	[EXIT_REASON_MONITOR_TRAP_FLAG]       = {true,true,0,0}, //37 vmx.c exit handlers array
-	[38]={false,false,0,0}, //38 not present and not implemented
-	[EXIT_REASON_MONITOR_INSTRUCTION]     = {true,true,0,0}, //39 vmx.c exit handlers array
-	[EXIT_REASON_PAUSE_INSTRUCTION]       = {true,true,0,0}, //40 vmx.c exit handlers array
-    [EXIT_REASON_MCE_DURING_VMENTRY]      = {true,true,0,0}, //41 vmx.c exit handlers array
-	[42]={false,false,0,0}, //42  not present and not implemented
-    [EXIT_REASON_TPR_BELOW_THRESHOLD]     = {true,true,0,0}, //43 vmx.c exit handlers array
-    [EXIT_REASON_APIC_ACCESS]             = {true,true,0,0}, //44 vmx.c exit handlers array
-    [EXIT_REASON_EOI_INDUCED]             = {true,true,0,0},	//45 vmx.c exit handlers array
-	[EXIT_REASON_GDTR_IDTR]		      	  = {true,true,0,0}, //46 vmx.c exit handlers array
-	[EXIT_REASON_LDTR_TR]		      	  = {true,true,0,0}, //47 vmx.c exit handlers array
-	[EXIT_REASON_EPT_VIOLATION]	      	  = {true,true,0,0}, //48 vmx.c exit handlers array
-	[EXIT_REASON_EPT_MISCONFIG]           = {true,true,0,0}, //49 vmx.c exit handlers array
-	[EXIT_REASON_INVEPT]                  = {true,true,0,0}, //50 vmx.c exit handlers array
-	[EXIT_REASON_RDTSCP]				  = {true,true,0,0}, //51 nested.c
-	[EXIT_REASON_PREEMPTION_TIMER]	      = {true,true,0,0}, //52 vmx.c exit handlers array
-	[EXIT_REASON_INVVPID]                 = {true,true,0,0}, //53 vmx.c exit handlers array
-	[EXIT_REASON_WBINVD]                  = {true,true,0,0}, //54 vmx.c exit handlers array
-	[EXIT_REASON_XSETBV]                  = {true,true,0,0}, //55 vmx.c exit handlers array
-	[EXIT_REASON_APIC_WRITE]              = {true,true,0,0}, //56 vmx.c exit handlers array
-	[EXIT_REASON_RDRAND]                  = {true,true,0,0}, //57 vmx.c exit handlers array
-	[EXIT_REASON_INVPCID]                 = {true,true,0,0}, //58 vmx.c exit handlers array
-	[EXIT_REASON_VMFUNC]		      	  = {true,true,0,0}, //59 vmx.c exit handlers array
-	[EXIT_REASON_ENCLS]		              = {true,true,0,0}, //60 vmx.c exit handlers array
-	[EXIT_REASON_RDSEED]                  = {true,true,0,0}, //61 vmx.c exit handlers array
-	[EXIT_REASON_PML_FULL]		          = {true,true,0,0}, //62 vmx.c exit handlers array
-	[EXIT_REASON_XSAVES]                  = {true,true,0,0}, //63 nested.c
-	[EXIT_REASON_XRSTORS]                 = {true,true,0,0}, //64 nested.c
-	[65]={false,false,0,0}, // not present and not implemented
-	[66]		      = {false,true,0,0}, //66 present in sdm not implemented
-	[EXIT_REASON_UMWAIT]                  = {true,true,0,0}, //67 nested.c
-	[EXIT_REASON_TPAUSE]                  = {true,true,0,0}, //68 nested.c
-	[69]               = {false,true,0,0}, //69 present in sdm not implemented
-	[70]={false,false,0,0}, // not present and not implemented
-	[71]={false,false,0,0}, // not present and not implemented
-	[72]={false,false,0,0}, // not present and not implemented
-	[73]={false,false,0,0}, // not present and not implemented
-	[EXIT_REASON_BUS_LOCK]                = {true,true,0,0} //74 vmx.c exit handlers array
+	[EXIT_REASON_EXCEPTION_NMI] = { true, true, 0,
+					0 }, //0 vmx.c exit handlers array
+	[EXIT_REASON_EXTERNAL_INTERRUPT] = { true, true, 0,
+					     0 }, //1 vmx.c exit handlers array
+	[EXIT_REASON_TRIPLE_FAULT] = { true, true, 0,
+				       0 }, //2 vmx.c exit handlers array
+	[EXIT_REASON_INIT_SIGNAL] = { true, true, 0,
+				      0 }, //3  nested.c nested vmx exit
+	[EXIT_REASON_SIPI_SIGNAL] = { true, true, 0,
+				      0 }, //4  nested.c nested vmx exit
+	[5] = { false, true, 0, 0 }, //5 present in sdm but not implemented
+	[6] = { false, true, 0, 0 }, //6 present in sdm but not implemented
+	[EXIT_REASON_INTERRUPT_WINDOW] = { true, true, 0,
+					   0 }, //7 vmx.c exit handlers array
+	[EXIT_REASON_NMI_WINDOW] = { true, true, 0,
+				     0 }, //8 vmx.c exit handlers array
+	[EXIT_REASON_TASK_SWITCH] = { true, true, 0,
+				      0 }, //9 vmx.c exit handlers array
+	[EXIT_REASON_CPUID] = { true, true, 0,
+				0 }, //10 vmx.c exit handlers array
+	[11] = { false, true, 0, 0 }, //11 present in sdm but not implemented
+	[EXIT_REASON_HLT] = { true, true, 0, 0 }, //12 vmx.c exit handlers array
+	[EXIT_REASON_INVD] = { true, true, 0,
+			       0 }, //13 vmx.c exit handlers array
+	[EXIT_REASON_INVLPG] = { true, true, 0,
+				 0 }, //14 vmx.c exit handlers array
+	[EXIT_REASON_RDPMC] = { true, true, 0,
+				0 }, //15 vmx.c exit handlers array
+	[EXIT_REASON_RDTSC] = { true, true, 0,
+				0 }, //16 nested.c nested vmx exit
+	[17] = { false, true, 0, 0 }, //17 present in sdm but not implemented
+	[EXIT_REASON_VMCALL] = { true, true, 0,
+				 0 }, //18 vmx.c exit handlers array
+	[EXIT_REASON_VMCLEAR] = { true, true, 0,
+				  0 }, //19 vmx.c exit handlers array
+	[EXIT_REASON_VMLAUNCH] = { true, true, 0,
+				   0 }, //20 vmx.c exit handlers array
+	[EXIT_REASON_VMPTRLD] = { true, true, 0,
+				  0 }, //21 vmx.c exit handlers array
+	[EXIT_REASON_VMPTRST] = { true, true, 0,
+				  0 }, //22 vmx.c exit handlers array
+	[EXIT_REASON_VMREAD] = { true, true, 0,
+				 0 }, //23 vmx.c exit handlers array
+	[EXIT_REASON_VMRESUME] = { true, true, 0,
+				   0 }, //24 vmx.c exit handlers array
+	[EXIT_REASON_VMWRITE] = { true, true, 0,
+				  0 }, //25 vmx.c exit handlers array
+	[EXIT_REASON_VMOFF] = { true, true, 0,
+				0 }, //26 vmx.c exit handlers array
+	[EXIT_REASON_VMON] = { true, true, 0,
+			       0 }, //27 vmx.c exit handlers array
+	[EXIT_REASON_CR_ACCESS] = { true, true, 0,
+				    0 }, //28 vmx.c exit handlers array
+	[EXIT_REASON_DR_ACCESS] = { true, true, 0,
+				    0 }, //29 vmx.c exit handlers array
+	[EXIT_REASON_IO_INSTRUCTION] = { true, true, 0,
+					 0 }, //30 vmx.c exit handlers array
+	[EXIT_REASON_MSR_READ] = { true, true, 0,
+				   0 }, //31 vmx.c exit handlers array
+	[EXIT_REASON_MSR_WRITE] = { true, true, 0,
+				    0 }, //32 vmx.c exit handlers array
+	[EXIT_REASON_INVALID_STATE] = { true, true, 0,
+					0 }, //33 vmx.c and nested.c nested vm
+	[EXIT_REASON_MSR_LOAD_FAIL] = { true, true, 0,
+					0 }, //34 nested.c nested vmx exit
+	[35] = { false, false, 0, 0 }, // not present and not implemented
+	[EXIT_REASON_MWAIT_INSTRUCTION] = { true, true, 0,
+					    0 }, //36 vmx.c exit handlers array
+	[EXIT_REASON_MONITOR_TRAP_FLAG] = { true, true, 0,
+					    0 }, //37 vmx.c exit handlers array
+	[38] = { false, false, 0, 0 }, //38 not present and not implemented
+	[EXIT_REASON_MONITOR_INSTRUCTION] = { true, true, 0,
+					      0 }, //39 vmx.c exit handlers array
+	[EXIT_REASON_PAUSE_INSTRUCTION] = { true, true, 0,
+					    0 }, //40 vmx.c exit handlers array
+	[EXIT_REASON_MCE_DURING_VMENTRY] = { true, true, 0,
+					     0 }, //41 vmx.c exit handlers array
+	[42] = { false, false, 0, 0 }, //42  not present and not implemented
+	[EXIT_REASON_TPR_BELOW_THRESHOLD] = { true, true, 0,
+					      0 }, //43 vmx.c exit handlers array
+	[EXIT_REASON_APIC_ACCESS] = { true, true, 0,
+				      0 }, //44 vmx.c exit handlers array
+	[EXIT_REASON_EOI_INDUCED] = { true, true, 0,
+				      0 }, //45 vmx.c exit handlers array
+	[EXIT_REASON_GDTR_IDTR] = { true, true, 0,
+				    0 }, //46 vmx.c exit handlers array
+	[EXIT_REASON_LDTR_TR] = { true, true, 0,
+				  0 }, //47 vmx.c exit handlers array
+	[EXIT_REASON_EPT_VIOLATION] = { true, true, 0,
+					0 }, //48 vmx.c exit handlers array
+	[EXIT_REASON_EPT_MISCONFIG] = { true, true, 0,
+					0 }, //49 vmx.c exit handlers array
+	[EXIT_REASON_INVEPT] = { true, true, 0,
+				 0 }, //50 vmx.c exit handlers array
+	[EXIT_REASON_RDTSCP] = { true, true, 0, 0 }, //51 nested.c
+	[EXIT_REASON_PREEMPTION_TIMER] = { true, true, 0,
+					   0 }, //52 vmx.c exit handlers array
+	[EXIT_REASON_INVVPID] = { true, true, 0,
+				  0 }, //53 vmx.c exit handlers array
+	[EXIT_REASON_WBINVD] = { true, true, 0,
+				 0 }, //54 vmx.c exit handlers array
+	[EXIT_REASON_XSETBV] = { true, true, 0,
+				 0 }, //55 vmx.c exit handlers array
+	[EXIT_REASON_APIC_WRITE] = { true, true, 0,
+				     0 }, //56 vmx.c exit handlers array
+	[EXIT_REASON_RDRAND] = { true, true, 0,
+				 0 }, //57 vmx.c exit handlers array
+	[EXIT_REASON_INVPCID] = { true, true, 0,
+				  0 }, //58 vmx.c exit handlers array
+	[EXIT_REASON_VMFUNC] = { true, true, 0,
+				 0 }, //59 vmx.c exit handlers array
+	[EXIT_REASON_ENCLS] = { true, true, 0,
+				0 }, //60 vmx.c exit handlers array
+	[EXIT_REASON_RDSEED] = { true, true, 0,
+				 0 }, //61 vmx.c exit handlers array
+	[EXIT_REASON_PML_FULL] = { true, true, 0,
+				   0 }, //62 vmx.c exit handlers array
+	[EXIT_REASON_XSAVES] = { true, true, 0, 0 }, //63 nested.c
+	[EXIT_REASON_XRSTORS] = { true, true, 0, 0 }, //64 nested.c
+	[65] = { false, false, 0, 0 }, // not present and not implemented
+	[66] = { false, true, 0, 0 }, //66 present in sdm not implemented
+	[EXIT_REASON_UMWAIT] = { true, true, 0, 0 }, //67 nested.c
+	[EXIT_REASON_TPAUSE] = { true, true, 0, 0 }, //68 nested.c
+	[69] = { false, true, 0, 0 }, //69 present in sdm not implemented
+	[70] = { false, false, 0, 0 }, // not present and not implemented
+	[71] = { false, false, 0, 0 }, // not present and not implemented
+	[72] = { false, false, 0, 0 }, // not present and not implemented
+	[73] = { false, false, 0, 0 }, // not present and not implemented
+	[EXIT_REASON_BUS_LOCK] = { true, true, 0,
+				   0 } //74 vmx.c exit handlers array
 };
 EXPORT_SYMBOL_GPL(vmexitcounter);
 
@@ -122,8 +177,8 @@ static u32 xstate_required_size(u64 xstate_bv, bool compacted)
 	xstate_bv &= XFEATURE_MASK_EXTEND;
 	while (xstate_bv) {
 		if (xstate_bv & 0x1) {
-		        u32 eax, ebx, ecx, edx, offset;
-		        cpuid_count(0xD, feature_bit, &eax, &ebx, &ecx, &edx);
+			u32 eax, ebx, ecx, edx, offset;
+			cpuid_count(0xD, feature_bit, &eax, &ebx, &ecx, &edx);
 			offset = compacted ? ret : ebx;
 			ret = max(ret, offset + eax);
 		}
@@ -138,8 +193,9 @@ static u32 xstate_required_size(u64 xstate_bv, bool compacted)
 #define F feature_bit
 #define SF(name) (boot_cpu_has(X86_FEATURE_##name) ? F(name) : 0)
 
-static inline struct kvm_cpuid_entry2 *cpuid_entry2_find(
-	struct kvm_cpuid_entry2 *entries, int nent, u32 function, u32 index)
+static inline struct kvm_cpuid_entry2 *
+cpuid_entry2_find(struct kvm_cpuid_entry2 *entries, int nent, u32 function,
+		  u32 index)
 {
 	struct kvm_cpuid_entry2 *e;
 	int i;
@@ -148,7 +204,8 @@ static inline struct kvm_cpuid_entry2 *cpuid_entry2_find(
 		e = &entries[i];
 
 		if (e->function == function &&
-		    (!(e->flags & KVM_CPUID_FLAG_SIGNIFCANT_INDEX) || e->index == index))
+		    (!(e->flags & KVM_CPUID_FLAG_SIGNIFCANT_INDEX) ||
+		     e->index == index))
 			return e;
 	}
 
@@ -197,10 +254,12 @@ void kvm_update_cpuid_runtime(struct kvm_vcpu *vcpu)
 		/* Update OSXSAVE bit */
 		if (boot_cpu_has(X86_FEATURE_XSAVE))
 			cpuid_entry_change(best, X86_FEATURE_OSXSAVE,
-				   kvm_read_cr4_bits(vcpu, X86_CR4_OSXSAVE));
+					   kvm_read_cr4_bits(vcpu,
+							     X86_CR4_OSXSAVE));
 
 		cpuid_entry_change(best, X86_FEATURE_APIC,
-			   vcpu->arch.apic_base & MSR_IA32_APICBASE_ENABLE);
+				   vcpu->arch.apic_base &
+					   MSR_IA32_APICBASE_ENABLE);
 	}
 
 	best = kvm_find_cpuid_entry(vcpu, 7, 0);
@@ -219,15 +278,16 @@ void kvm_update_cpuid_runtime(struct kvm_vcpu *vcpu)
 
 	best = kvm_find_cpuid_entry(vcpu, KVM_CPUID_FEATURES, 0);
 	if (kvm_hlt_in_guest(vcpu->kvm) && best &&
-		(best->eax & (1 << KVM_FEATURE_PV_UNHALT)))
+	    (best->eax & (1 << KVM_FEATURE_PV_UNHALT)))
 		best->eax &= ~(1 << KVM_FEATURE_PV_UNHALT);
 
-	if (!kvm_check_has_quirk(vcpu->kvm, KVM_X86_QUIRK_MISC_ENABLE_NO_MWAIT)) {
+	if (!kvm_check_has_quirk(vcpu->kvm,
+				 KVM_X86_QUIRK_MISC_ENABLE_NO_MWAIT)) {
 		best = kvm_find_cpuid_entry(vcpu, 0x1, 0);
 		if (best)
 			cpuid_entry_change(best, X86_FEATURE_MWAIT,
 					   vcpu->arch.ia32_misc_enable_msr &
-					   MSR_IA32_MISC_ENABLE_MWAIT);
+						   MSR_IA32_MISC_ENABLE_MWAIT);
 	}
 }
 EXPORT_SYMBOL_GPL(kvm_update_cpuid_runtime);
@@ -276,7 +336,7 @@ static void kvm_vcpu_after_set_cpuid(struct kvm_vcpu *vcpu)
 
 	kvm_pmu_refresh(vcpu);
 	vcpu->arch.cr4_guest_rsvd_bits =
-	    __cr4_reserved_bits(guest_cpuid_has, vcpu);
+		__cr4_reserved_bits(guest_cpuid_has, vcpu);
 
 	kvm_hv_set_cpuid(vcpu);
 
@@ -315,8 +375,7 @@ u64 kvm_vcpu_reserved_gpa_bits_raw(struct kvm_vcpu *vcpu)
 }
 
 /* when an old userspace process fills a new kernel module */
-int kvm_vcpu_ioctl_set_cpuid(struct kvm_vcpu *vcpu,
-			     struct kvm_cpuid *cpuid,
+int kvm_vcpu_ioctl_set_cpuid(struct kvm_vcpu *vcpu, struct kvm_cpuid *cpuid,
 			     struct kvm_cpuid_entry __user *entries)
 {
 	int r, i;
@@ -331,7 +390,8 @@ int kvm_vcpu_ioctl_set_cpuid(struct kvm_vcpu *vcpu,
 		if (IS_ERR(e))
 			return PTR_ERR(e);
 
-		e2 = kvmalloc_array(cpuid->nent, sizeof(*e2), GFP_KERNEL_ACCOUNT);
+		e2 = kvmalloc_array(cpuid->nent, sizeof(*e2),
+				    GFP_KERNEL_ACCOUNT);
 		if (!e2) {
 			r = -ENOMEM;
 			goto out_free_cpuid;
@@ -369,8 +429,7 @@ out_free_cpuid:
 	return r;
 }
 
-int kvm_vcpu_ioctl_set_cpuid2(struct kvm_vcpu *vcpu,
-			      struct kvm_cpuid2 *cpuid,
+int kvm_vcpu_ioctl_set_cpuid2(struct kvm_vcpu *vcpu, struct kvm_cpuid2 *cpuid,
 			      struct kvm_cpuid_entry2 __user *entries)
 {
 	struct kvm_cpuid_entry2 *e2 = NULL;
@@ -380,7 +439,8 @@ int kvm_vcpu_ioctl_set_cpuid2(struct kvm_vcpu *vcpu,
 		return -E2BIG;
 
 	if (cpuid->nent) {
-		e2 = vmemdup_user(entries, array_size(sizeof(*e2), cpuid->nent));
+		e2 = vmemdup_user(entries,
+				  array_size(sizeof(*e2), cpuid->nent));
 		if (IS_ERR(e2))
 			return PTR_ERR(e2);
 	}
@@ -401,8 +461,7 @@ int kvm_vcpu_ioctl_set_cpuid2(struct kvm_vcpu *vcpu,
 	return 0;
 }
 
-int kvm_vcpu_ioctl_get_cpuid2(struct kvm_vcpu *vcpu,
-			      struct kvm_cpuid2 *cpuid,
+int kvm_vcpu_ioctl_get_cpuid2(struct kvm_vcpu *vcpu, struct kvm_cpuid2 *cpuid,
 			      struct kvm_cpuid_entry2 __user *entries)
 {
 	int r;
@@ -412,7 +471,8 @@ int kvm_vcpu_ioctl_get_cpuid2(struct kvm_vcpu *vcpu,
 		goto out;
 	r = -EFAULT;
 	if (copy_to_user(entries, vcpu->arch.cpuid_entries,
-			 vcpu->arch.cpuid_nent * sizeof(struct kvm_cpuid_entry2)))
+			 vcpu->arch.cpuid_nent *
+				 sizeof(struct kvm_cpuid_entry2)))
 		goto out;
 	return 0;
 
@@ -429,14 +489,14 @@ static __always_inline void __kvm_cpu_cap_mask(unsigned int leaf)
 
 	reverse_cpuid_check(leaf);
 
-	cpuid_count(cpuid.function, cpuid.index,
-		    &entry.eax, &entry.ebx, &entry.ecx, &entry.edx);
+	cpuid_count(cpuid.function, cpuid.index, &entry.eax, &entry.ebx,
+		    &entry.ecx, &entry.edx);
 
 	kvm_cpu_caps[leaf] &= *__cpuid_entry_get_reg(&entry, cpuid.reg);
 }
 
-static __always_inline
-void kvm_cpu_cap_init_scattered(enum kvm_only_cpuid_leafs leaf, u32 mask)
+static __always_inline void
+kvm_cpu_cap_init_scattered(enum kvm_only_cpuid_leafs leaf, u32 mask)
 {
 	/* Use kvm_cpu_cap_mask for non-scattered leafs. */
 	BUILD_BUG_ON(leaf < NCAPINTS);
@@ -467,55 +527,58 @@ void kvm_set_cpu_caps(void)
 #endif
 	memset(kvm_cpu_caps, 0, sizeof(kvm_cpu_caps));
 
-	BUILD_BUG_ON(sizeof(kvm_cpu_caps) - (NKVMCAPINTS * sizeof(*kvm_cpu_caps)) >
+	BUILD_BUG_ON(sizeof(kvm_cpu_caps) -
+			     (NKVMCAPINTS * sizeof(*kvm_cpu_caps)) >
 		     sizeof(boot_cpu_data.x86_capability));
 
 	memcpy(&kvm_cpu_caps, &boot_cpu_data.x86_capability,
 	       sizeof(kvm_cpu_caps) - (NKVMCAPINTS * sizeof(*kvm_cpu_caps)));
 
 	kvm_cpu_cap_mask(CPUID_1_ECX,
-		/*
+			 /*
 		 * NOTE: MONITOR (and MWAIT) are emulated as NOP, but *not*
 		 * advertised to guests via CPUID!
 		 */
-		F(XMM3) | F(PCLMULQDQ) | 0 /* DTES64, MONITOR */ |
-		0 /* DS-CPL, VMX, SMX, EST */ |
-		0 /* TM2 */ | F(SSSE3) | 0 /* CNXT-ID */ | 0 /* Reserved */ |
-		F(FMA) | F(CX16) | 0 /* xTPR Update */ | F(PDCM) |
-		F(PCID) | 0 /* Reserved, DCA */ | F(XMM4_1) |
-		F(XMM4_2) | F(X2APIC) | F(MOVBE) | F(POPCNT) |
-		0 /* Reserved*/ | F(AES) | F(XSAVE) | 0 /* OSXSAVE */ | F(AVX) |
-		F(F16C) | F(RDRAND)
-	);
+			 F(XMM3) | F(PCLMULQDQ) | 0 /* DTES64, MONITOR */ |
+				 0 /* DS-CPL, VMX, SMX, EST */ | 0 /* TM2 */ |
+				 F(SSSE3) | 0 /* CNXT-ID */ | 0 /* Reserved */ |
+				 F(FMA) | F(CX16) | 0 /* xTPR Update */ |
+				 F(PDCM) | F(PCID) | 0 /* Reserved, DCA */ |
+				 F(XMM4_1) | F(XMM4_2) | F(X2APIC) | F(MOVBE) |
+				 F(POPCNT) | 0 /* Reserved*/ | F(AES) |
+				 F(XSAVE) | 0 /* OSXSAVE */ | F(AVX) | F(F16C) |
+				 F(RDRAND));
 	/* KVM emulates x2apic in software irrespective of host support. */
 	kvm_cpu_cap_set(X86_FEATURE_X2APIC);
 
-	kvm_cpu_cap_mask(CPUID_1_EDX,
-		F(FPU) | F(VME) | F(DE) | F(PSE) |
-		F(TSC) | F(MSR) | F(PAE) | F(MCE) |
-		F(CX8) | F(APIC) | 0 /* Reserved */ | F(SEP) |
-		F(MTRR) | F(PGE) | F(MCA) | F(CMOV) |
-		F(PAT) | F(PSE36) | 0 /* PSN */ | F(CLFLUSH) |
-		0 /* Reserved, DS, ACPI */ | F(MMX) |
-		F(FXSR) | F(XMM) | F(XMM2) | F(SELFSNOOP) |
-		0 /* HTT, TM, Reserved, PBE */
+	kvm_cpu_cap_mask(
+		CPUID_1_EDX,
+		F(FPU) | F(VME) | F(DE) | F(PSE) | F(TSC) | F(MSR) | F(PAE) |
+			F(MCE) | F(CX8) | F(APIC) | 0 /* Reserved */ | F(SEP) |
+			F(MTRR) | F(PGE) | F(MCA) | F(CMOV) | F(PAT) |
+			F(PSE36) | 0 /* PSN */ | F(CLFLUSH) |
+			0 /* Reserved, DS, ACPI */ | F(MMX) | F(FXSR) | F(XMM) |
+			F(XMM2) | F(SELFSNOOP) | 0 /* HTT, TM, Reserved, PBE */
 	);
 
-	kvm_cpu_cap_mask(CPUID_7_0_EBX,
+	kvm_cpu_cap_mask(
+		CPUID_7_0_EBX,
 		F(FSGSBASE) | F(SGX) | F(BMI1) | F(HLE) | F(AVX2) | F(SMEP) |
-		F(BMI2) | F(ERMS) | F(INVPCID) | F(RTM) | 0 /*MPX*/ | F(RDSEED) |
-		F(ADX) | F(SMAP) | F(AVX512IFMA) | F(AVX512F) | F(AVX512PF) |
-		F(AVX512ER) | F(AVX512CD) | F(CLFLUSHOPT) | F(CLWB) | F(AVX512DQ) |
-		F(SHA_NI) | F(AVX512BW) | F(AVX512VL) | 0 /*INTEL_PT*/
+			F(BMI2) | F(ERMS) | F(INVPCID) | F(RTM) | 0 /*MPX*/ |
+			F(RDSEED) | F(ADX) | F(SMAP) | F(AVX512IFMA) |
+			F(AVX512F) | F(AVX512PF) | F(AVX512ER) | F(AVX512CD) |
+			F(CLFLUSHOPT) | F(CLWB) | F(AVX512DQ) | F(SHA_NI) |
+			F(AVX512BW) | F(AVX512VL) | 0 /*INTEL_PT*/
 	);
 
 	kvm_cpu_cap_mask(CPUID_7_ECX,
-		F(AVX512VBMI) | F(LA57) | F(PKU) | 0 /*OSPKE*/ | F(RDPID) |
-		F(AVX512_VPOPCNTDQ) | F(UMIP) | F(AVX512_VBMI2) | F(GFNI) |
-		F(VAES) | F(VPCLMULQDQ) | F(AVX512_VNNI) | F(AVX512_BITALG) |
-		F(CLDEMOTE) | F(MOVDIRI) | F(MOVDIR64B) | 0 /*WAITPKG*/ |
-		F(SGX_LC) | F(BUS_LOCK_DETECT)
-	);
+			 F(AVX512VBMI) | F(LA57) | F(PKU) | 0 /*OSPKE*/ |
+				 F(RDPID) | F(AVX512_VPOPCNTDQ) | F(UMIP) |
+				 F(AVX512_VBMI2) | F(GFNI) | F(VAES) |
+				 F(VPCLMULQDQ) | F(AVX512_VNNI) |
+				 F(AVX512_BITALG) | F(CLDEMOTE) | F(MOVDIRI) |
+				 F(MOVDIR64B) | 0 /*WAITPKG*/ | F(SGX_LC) |
+				 F(BUS_LOCK_DETECT));
 	/* Set LA57 based on hardware capability. */
 	if (cpuid_ecx(7) & F(LA57))
 		kvm_cpu_cap_set(X86_FEATURE_LA57);
@@ -528,11 +591,11 @@ void kvm_set_cpu_caps(void)
 		kvm_cpu_cap_clear(X86_FEATURE_PKU);
 
 	kvm_cpu_cap_mask(CPUID_7_EDX,
-		F(AVX512_4VNNIW) | F(AVX512_4FMAPS) | F(SPEC_CTRL) |
-		F(SPEC_CTRL_SSBD) | F(ARCH_CAPABILITIES) | F(INTEL_STIBP) |
-		F(MD_CLEAR) | F(AVX512_VP2INTERSECT) | F(FSRM) |
-		F(SERIALIZE) | F(TSXLDTRK) | F(AVX512_FP16)
-	);
+			 F(AVX512_4VNNIW) | F(AVX512_4FMAPS) | F(SPEC_CTRL) |
+				 F(SPEC_CTRL_SSBD) | F(ARCH_CAPABILITIES) |
+				 F(INTEL_STIBP) | F(MD_CLEAR) |
+				 F(AVX512_VP2INTERSECT) | F(FSRM) |
+				 F(SERIALIZE) | F(TSXLDTRK) | F(AVX512_FP16));
 
 	/* TSC_ADJUST and ARCH_CAPABILITIES are emulated in software. */
 	kvm_cpu_cap_set(X86_FEATURE_TSC_ADJUST);
@@ -545,45 +608,39 @@ void kvm_set_cpu_caps(void)
 	if (boot_cpu_has(X86_FEATURE_AMD_SSBD))
 		kvm_cpu_cap_set(X86_FEATURE_SPEC_CTRL_SSBD);
 
-	kvm_cpu_cap_mask(CPUID_7_1_EAX,
-		F(AVX_VNNI) | F(AVX512_BF16)
-	);
+	kvm_cpu_cap_mask(CPUID_7_1_EAX, F(AVX_VNNI) | F(AVX512_BF16));
 
 	kvm_cpu_cap_mask(CPUID_D_1_EAX,
-		F(XSAVEOPT) | F(XSAVEC) | F(XGETBV1) | F(XSAVES)
-	);
+			 F(XSAVEOPT) | F(XSAVEC) | F(XGETBV1) | F(XSAVES));
 
-	kvm_cpu_cap_init_scattered(CPUID_12_EAX,
-		SF(SGX1) | SF(SGX2)
-	);
+	kvm_cpu_cap_init_scattered(CPUID_12_EAX, SF(SGX1) | SF(SGX2));
 
 	kvm_cpu_cap_mask(CPUID_8000_0001_ECX,
-		F(LAHF_LM) | F(CMP_LEGACY) | 0 /*SVM*/ | 0 /* ExtApicSpace */ |
-		F(CR8_LEGACY) | F(ABM) | F(SSE4A) | F(MISALIGNSSE) |
-		F(3DNOWPREFETCH) | F(OSVW) | 0 /* IBS */ | F(XOP) |
-		0 /* SKINIT, WDT, LWP */ | F(FMA4) | F(TBM) |
-		F(TOPOEXT) | F(PERFCTR_CORE)
-	);
+			 F(LAHF_LM) | F(CMP_LEGACY) | 0 /*SVM*/ |
+				 0 /* ExtApicSpace */ | F(CR8_LEGACY) | F(ABM) |
+				 F(SSE4A) | F(MISALIGNSSE) | F(3DNOWPREFETCH) |
+				 F(OSVW) | 0 /* IBS */ | F(XOP) |
+				 0 /* SKINIT, WDT, LWP */ | F(FMA4) | F(TBM) |
+				 F(TOPOEXT) | F(PERFCTR_CORE));
 
 	kvm_cpu_cap_mask(CPUID_8000_0001_EDX,
-		F(FPU) | F(VME) | F(DE) | F(PSE) |
-		F(TSC) | F(MSR) | F(PAE) | F(MCE) |
-		F(CX8) | F(APIC) | 0 /* Reserved */ | F(SYSCALL) |
-		F(MTRR) | F(PGE) | F(MCA) | F(CMOV) |
-		F(PAT) | F(PSE36) | 0 /* Reserved */ |
-		F(NX) | 0 /* Reserved */ | F(MMXEXT) | F(MMX) |
-		F(FXSR) | F(FXSR_OPT) | f_gbpages | F(RDTSCP) |
-		0 /* Reserved */ | f_lm | F(3DNOWEXT) | F(3DNOW)
-	);
+			 F(FPU) | F(VME) | F(DE) | F(PSE) | F(TSC) | F(MSR) |
+				 F(PAE) | F(MCE) | F(CX8) | F(APIC) |
+				 0 /* Reserved */ | F(SYSCALL) | F(MTRR) |
+				 F(PGE) | F(MCA) | F(CMOV) | F(PAT) | F(PSE36) |
+				 0 /* Reserved */ | F(NX) | 0 /* Reserved */ |
+				 F(MMXEXT) | F(MMX) | F(FXSR) | F(FXSR_OPT) |
+				 f_gbpages | F(RDTSCP) | 0 /* Reserved */ |
+				 f_lm | F(3DNOWEXT) | F(3DNOW));
 
 	if (!tdp_enabled && IS_ENABLED(CONFIG_X86_64))
 		kvm_cpu_cap_set(X86_FEATURE_GBPAGES);
 
 	kvm_cpu_cap_mask(CPUID_8000_0008_EBX,
-		F(CLZERO) | F(XSAVEERPTR) |
-		F(WBNOINVD) | F(AMD_IBPB) | F(AMD_IBRS) | F(AMD_SSBD) | F(VIRT_SSBD) |
-		F(AMD_SSB_NO) | F(AMD_STIBP) | F(AMD_STIBP_ALWAYS_ON)
-	);
+			 F(CLZERO) | F(XSAVEERPTR) | F(WBNOINVD) | F(AMD_IBPB) |
+				 F(AMD_IBRS) | F(AMD_SSBD) | F(VIRT_SSBD) |
+				 F(AMD_SSB_NO) | F(AMD_STIBP) |
+				 F(AMD_STIBP_ALWAYS_ON));
 
 	/*
 	 * AMD has separate bits for each SPEC_CTRL bit.
@@ -615,14 +672,13 @@ void kvm_set_cpu_caps(void)
 	kvm_cpu_cap_mask(CPUID_8000_000A_EDX, 0);
 
 	kvm_cpu_cap_mask(CPUID_8000_001F_EAX,
-		0 /* SME */ | F(SEV) | 0 /* VM_PAGE_FLUSH */ | F(SEV_ES) |
-		F(SME_COHERENT));
+			 0 /* SME */ | F(SEV) | 0 /* VM_PAGE_FLUSH */ |
+				 F(SEV_ES) | F(SME_COHERENT));
 
 	kvm_cpu_cap_mask(CPUID_C000_0001_EDX,
-		F(XSTORE) | F(XSTORE_EN) | F(XCRYPT) | F(XCRYPT_EN) |
-		F(ACE2) | F(ACE2_EN) | F(PHE) | F(PHE_EN) |
-		F(PMM) | F(PMM_EN)
-	);
+			 F(XSTORE) | F(XSTORE_EN) | F(XCRYPT) | F(XCRYPT_EN) |
+				 F(ACE2) | F(ACE2_EN) | F(PHE) | F(PHE_EN) |
+				 F(PMM) | F(PMM_EN));
 
 	/*
 	 * Hide RDTSCP and RDPID if either feature is reported as supported but
@@ -634,7 +690,7 @@ void kvm_set_cpu_caps(void)
 	 */
 	if (WARN_ON((kvm_cpu_cap_has(X86_FEATURE_RDTSCP) ||
 		     kvm_cpu_cap_has(X86_FEATURE_RDPID)) &&
-		     !kvm_is_supported_user_return_msr(MSR_TSC_AUX))) {
+		    !kvm_is_supported_user_return_msr(MSR_TSC_AUX))) {
 		kvm_cpu_cap_clear(X86_FEATURE_RDTSCP);
 		kvm_cpu_cap_clear(X86_FEATURE_RDPID);
 	}
@@ -661,8 +717,8 @@ static struct kvm_cpuid_entry2 *do_host_cpuid(struct kvm_cpuid_array *array,
 	entry->index = index;
 	entry->flags = 0;
 
-	cpuid_count(entry->function, entry->index,
-		    &entry->eax, &entry->ebx, &entry->ecx, &entry->edx);
+	cpuid_count(entry->function, entry->index, &entry->eax, &entry->ebx,
+		    &entry->ecx, &entry->edx);
 
 	switch (function) {
 	case 4:
@@ -819,7 +875,8 @@ static inline int __do_cpuid_func(struct kvm_cpuid_array *array, u32 function)
 		eax.split.bit_width = cap.bit_width_gp;
 		eax.split.mask_length = cap.events_mask_len;
 
-		edx.split.num_counters_fixed = min(cap.num_counters_fixed, MAX_FIXED_COUNTERS);
+		edx.split.num_counters_fixed =
+			min(cap.num_counters_fixed, MAX_FIXED_COUNTERS);
 		edx.split.bit_width_fixed = cap.bit_width_fixed;
 		if (cap.version)
 			edx.split.anythread_deprecated = 1;
@@ -862,9 +919,9 @@ static inline int __do_cpuid_func(struct kvm_cpuid_array *array, u32 function)
 			goto out;
 
 		cpuid_entry_override(entry, CPUID_D_1_EAX);
-		if (entry->eax & (F(XSAVES)|F(XSAVEC)))
-			entry->ebx = xstate_required_size(supported_xcr0 | supported_xss,
-							  true);
+		if (entry->eax & (F(XSAVES) | F(XSAVEC)))
+			entry->ebx = xstate_required_size(
+				supported_xcr0 | supported_xss, true);
 		else {
 			WARN_ON_ONCE(supported_xss != 0);
 			entry->ebx = 0;
@@ -893,7 +950,8 @@ static inline int __do_cpuid_func(struct kvm_cpuid_array *array, u32 function)
 			 * processor agrees with supported_xcr0/supported_xss
 			 * on whether this is an XCR0- or IA32_XSS-managed area.
 			 */
-			if (WARN_ON_ONCE(!entry->eax || (entry->ecx & 0x1) != s_state)) {
+			if (WARN_ON_ONCE(!entry->eax ||
+					 (entry->ecx & 0x1) != s_state)) {
 				--array->nent;
 				continue;
 			}
@@ -1140,7 +1198,10 @@ int kvm_dev_ioctl_get_cpuid(struct kvm_cpuid2 *cpuid,
 			    unsigned int type)
 {
 	static const u32 funcs[] = {
-		0, 0x80000000, CENTAUR_CPUID_SIGNATURE, KVM_CPUID_SIGNATURE,
+		0,
+		0x80000000,
+		CENTAUR_CPUID_SIGNATURE,
+		KVM_CPUID_SIGNATURE,
 	};
 
 	struct kvm_cpuid_array array = {
@@ -1156,8 +1217,8 @@ int kvm_dev_ioctl_get_cpuid(struct kvm_cpuid2 *cpuid,
 	if (sanity_check_entries(entries, cpuid->nent, type))
 		return -EINVAL;
 
-	array.entries = vzalloc(array_size(sizeof(struct kvm_cpuid_entry2),
-					   cpuid->nent));
+	array.entries = vzalloc(
+		array_size(sizeof(struct kvm_cpuid_entry2), cpuid->nent));
 	if (!array.entries)
 		return -ENOMEM;
 
@@ -1182,8 +1243,8 @@ out_free:
 struct kvm_cpuid_entry2 *kvm_find_cpuid_entry(struct kvm_vcpu *vcpu,
 					      u32 function, u32 index)
 {
-	return cpuid_entry2_find(vcpu->arch.cpuid_entries, vcpu->arch.cpuid_nent,
-				 function, index);
+	return cpuid_entry2_find(vcpu->arch.cpuid_entries,
+				 vcpu->arch.cpuid_nent, function, index);
 }
 EXPORT_SYMBOL_GPL(kvm_find_cpuid_entry);
 
@@ -1255,8 +1316,8 @@ get_out_of_range_cpuid_entry(struct kvm_vcpu *vcpu, u32 *fn_ptr, u32 index)
 	return kvm_find_cpuid_entry(vcpu, basic->eax, index);
 }
 
-bool kvm_cpuid(struct kvm_vcpu *vcpu, u32 *eax, u32 *ebx,
-	       u32 *ecx, u32 *edx, bool exact_only)
+bool kvm_cpuid(struct kvm_vcpu *vcpu, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx,
+	       bool exact_only)
 {
 	u32 orig_function = *eax, function = *eax, index = *ecx;
 	struct kvm_cpuid_entry2 *entry;
@@ -1277,7 +1338,8 @@ bool kvm_cpuid(struct kvm_vcpu *vcpu, u32 *eax, u32 *ebx,
 		*edx = entry->edx;
 		if (function == 7 && index == 0) {
 			u64 data;
-		        if (!__kvm_get_msr(vcpu, MSR_IA32_TSX_CTRL, &data, true) &&
+			if (!__kvm_get_msr(vcpu, MSR_IA32_TSX_CTRL, &data,
+					   true) &&
 			    (data & TSX_CTRL_CPUID_CLEAR))
 				*ebx &= ~(F(RTM) | F(HLE));
 		}
@@ -1310,82 +1372,100 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 	int32_t reason;
 	if (cpuid_fault_enabled(vcpu) && !kvm_require_cpl(vcpu, 0))
 		return 1;
-
 	eax = kvm_rax_read(vcpu);
-	/*pr_info("cpuid exit \n");*/
-	if(eax==0x4fffffff){
-			eax=total_exits;
-			pr_info("total exits: %d\n",total_exits);
-	}
-	else if(eax==0x4ffffffe){
-			ebx = (u32)((totaltime & 0xFFFFFFFF00000000LL) >> 32);
-		    ecx = (u32)(totaltime & 0xFFFFFFFFLL);
-			pr_info("total cpu time spent for vmexits in cycle: %lld\n",totaltime);
-	}
-	else if(eax==0x4ffffffd){
-			ecx = kvm_rcx_read(vcpu);
-			// read reason
-			reason=(int32_t) ecx;
-			if(reason<0&&reason>75){
-				//if reason is not within limits
-				eax=0;
-				ecx=0;
-				ebx=0;
-				edx=0x4fffffff;
-			}
-			else if (!vmexitcounter[reason].isValid){
+	ebx = kvm_rbx_read(vcpu);
+	ecx = kvm_rcx_read(vcpu);
+	edx = kvm_rdx_read(vcpu);
+	pr_info("eax,ebx,ecx,edx input: %x %x %x %x \n", eax, ebx, ecx, edx);
+	if (eax == 0x4fffffff) {
+		eax = total_exits;
+
+		pr_info("total exits: %d total basic exits:%d\n", total_exits,
+			totalbasicexits);
+		//pr_info("total exits: %d\n",total_exits);
+	} else if (eax == 0x4ffffffe) {
+		ebx = (u32)((totaltime & 0xFFFFFFFF00000000LL) >> 32);
+		ecx = (u32)(totaltime & 0xFFFFFFFFLL);
+		pr_info("total cpu time spent for vmexits in cycle: %lld\n",
+			totaltime);
+	} else if (eax == 0x4ffffffd) {
+		ecx = kvm_rcx_read(vcpu);
+		pr_info("ecx reason input: %x\n", ecx);
+		// read reason
+		reason = (int32_t)ecx;
+		if (reason >= 0 && reason < 75) {
+			//if reason is  within limits
+			if (vmexitcounter[reason].isValid == false) {
 				//if reason is not in sdm return 0
-				eax=0;
-				ecx=0;
-				ebx=0;
-				edx=0x4fffffff;
-			}
-			else if (!vmexitcounter[reason].isImplemented){
-				//if reason is in sdm but not implemented return 
-				eax=0;
+				eax = 0;
+				ecx = 0;
+				ebx = 0;
+				edx = 0xFFFFFFFF;
+				pr_info("Not Valid SDM reason in range but not valid %x\n",edx);
+			} else if (vmexitcounter[reason].isImplemented ==
+				   false) {
+				//if reason is in sdm but not implemented return
+				eax = 0;
+				ebx = 0;
+				ecx = 0;
+				edx = 0;
+				pr_info("Not Implemented in kvm\n");
+			} else {
+				//if present and implemented return exit count
+				eax = vmexitcounter[reason].vmexit_count;
 				ebx=0;
 				ecx=0;
 				edx=0;
 			}
-			else{
+			pr_info("exits for reason %d total exits: %d\n", reason,
+				vmexitcounter[reason].vmexit_count);
+		} else {
+			eax = 0;
+			ecx = 0;
+			ebx = 0;
+			edx = 0xffffffff;
+			pr_info("Not Valid SDM reason not in range\n");
+		}
+
+	} else if (eax == 0x4ffffffc) {
+		ecx = kvm_rcx_read(vcpu);
+		// read reason
+		reason = (int32_t)ecx;
+		if (reason >= 0 && reason < 75) {
+			//if reason is not within limits
+			if (vmexitcounter[reason].isValid == false) {
+				//if reason in sdm return 0
+				eax = 0;
+				ecx = 0;
+				ebx = 0;
+				edx = 0xffffffff;
+				pr_info("Not Valid SDM reason in range but not valid %x\n",edx);
+			} else if (vmexitcounter[reason].isImplemented==false) {
+				//if reason is in sdm but not implemented return
+				eax = 0;
+				ebx = 0;
+				ecx = 0;
+				edx = 0;
+				pr_info("Not Implemented in kvm\n");
+			} else {
 				//if present and implemented return exit count
-				eax=vmexitcounter[reason].vmexit_count;
-			}
-			pr_info("exits for reason %d total exits: %d\n",reason,vmexitcounter[reason].vmexit_count);
-	}
-	else if(eax==0x4ffffffc){
-			ecx = kvm_rcx_read(vcpu);
-			// read reason
-			reason=(int32_t) ecx;
-			if(reason<0&&reason>75){
-				//if reason is not within limits
-				eax=0;
-				ecx=0;
-				ebx=0;
-				edx=0x4fffffff;
-			}
-			else if (!vmexitcounter[reason].isValid){
-				//if reason is not in sdm return 0
-				eax=0;
-				ecx=0;
-				ebx=0;
-				edx=0x4fffffff;
-			}
-			else if (!vmexitcounter[reason].isImplemented){
-				//if reason is in sdm but not implemented return 
-				eax=0;
-				ebx=0;
-				ecx=0;
+				ebx = (u32)((vmexitcounter[reason].cycle_count &
+					     0xFFFFFFFF00000000LL) >>
+					    32);
+				ecx = (u32)(vmexitcounter[reason].cycle_count &
+					    0xFFFFFFFFLL);
 				edx=0;
 			}
-			else{
-				//if present and implemented return exit count
-				ebx = (u32)((vmexitcounter[reason].cycle_count & 0xFFFFFFFF00000000LL) >> 32);
-		    	ecx = (u32)(vmexitcounter[reason].cycle_count & 0xFFFFFFFFLL);
-			}
-			pr_info("exits for reason %d total exits: %d\n",reason,vmexitcounter[reason].vmexit_count);
-	}
-	else{
+			pr_info("time spent for reason %d : %lld\n", reason,
+				vmexitcounter[reason].cycle_count);
+		} else {
+			eax = 0;
+			ecx = 0;
+			ebx = 0;
+			edx = 0xffffffff;
+			pr_info("Not Valid SDM reason not in range\n");
+		}
+	} else {
 		ecx = kvm_rcx_read(vcpu);
 		kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
 	}
