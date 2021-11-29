@@ -1373,10 +1373,6 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 	if (cpuid_fault_enabled(vcpu) && !kvm_require_cpl(vcpu, 0))
 		return 1;
 	eax = kvm_rax_read(vcpu);
-	ebx = kvm_rbx_read(vcpu);
-	ecx = kvm_rcx_read(vcpu);
-	edx = kvm_rdx_read(vcpu);
-	pr_info("eax,ebx,ecx,edx input: %x %x %x %x \n", eax, ebx, ecx, edx);
 	if (eax == 0x4fffffff) {
 		eax = total_exits;
 

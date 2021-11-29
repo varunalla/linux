@@ -5902,6 +5902,7 @@ static void __add_exit_time(u64 startTime,u32 reason,bool valid){
 static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 {
 	int response,reason;
+	bool isUnexpectedProcessed=false;
 	u64 start=rdtsc();
 	struct vcpu_vmx *vmx = to_vmx(vcpu);
 	union vmx_exit_reason exit_reason = vmx->exit_reason;
@@ -5909,10 +5910,7 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 	u16 exit_handler_index;
 	total_exits++;
 	reason=(int)exit_reason.basic;
-	if(reason<0||reason>74){
-		pr_info("random reason :  %d ",reason);
-	}
-	else{
+	if(reason>=0&&reason<75){
 		totalbasicexits++;
 		vmexitcounter[exit_reason.basic].vmexit_count++;
 	}
@@ -5951,7 +5949,9 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 		 * PML full exit occurs as something is horribly wrong.
 		 */
 		if (exit_reason.basic == EXIT_REASON_PML_FULL){
+			
 			__add_exit_time(start,exit_reason.basic,true);
+			isUnexpectedProcessed=true;
 			goto unexpected_vmexit;
 		}
 
@@ -6100,7 +6100,8 @@ unexpected_vmexit:
 	vcpu->run->internal.ndata = 2;
 	vcpu->run->internal.data[0] = exit_reason.full;
 	vcpu->run->internal.data[1] = vcpu->arch.last_vmentry_cpu;
-	__add_exit_time(start,0,false);
+	if(isUnexpectedProcessed==false)
+		__add_exit_time(start,0,false);
 	return 0;
 }
 
