@@ -44,7 +44,7 @@ void totalExitTimeWithReason(int reason)
 	} else if (a == 0 && b == 0 && c == 0 && d == 0xffffffff) {
 		printf("Reason %d not defined in sdm\n", dreason);
 	} else {
-		printf("time spent by vmm for the reason  %d is %d cycles\n", dreason, time);
+		printf("time spent by vmm for the reason  %d is %ld cycles\n", dreason, time);
 	}
 }
 void getCpuIDTimewithReason(int reason)
