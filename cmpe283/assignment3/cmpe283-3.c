@@ -12,7 +12,7 @@ void totalExitCountWithReason(int reason)
 	asm("mov %%ebx, %0\n\t" : "=r"(b));
 	asm("mov %%ecx, %0\n\t" : "=r"(c));
 	asm("mov %%edx, %0\n\t" : "=r"(d));
-
+    printf("CPUID(0x4ffffffd) ");
 	if (a == 0 && b == 0 && c == 0 && d == 0) {
 		printf("Reason %d not Implemented in KVM\n", dreason);
 	} else if (a == 0 && b == 0 && c == 0 && d == 0xffffffff) {
@@ -39,6 +39,7 @@ void totalExitTimeWithReason(int reason)
 	ebx = (uint32_t)b;
 	ecx = (uint32_t)c;
 	time = (uint64_t)ebx << 32 | ecx;
+    printf("CPUID(0x4ffffffc) ");
     if (a == 0 && b == 0 && c == 0 && d == 0) {
 		printf("Reason %d not Implemented in KVM\n", dreason);
 	} else if (a == 0 && b == 0 && c == 0 && d == 0xffffffff) {
@@ -91,12 +92,15 @@ void getCpuID()
 	asm("xor %ebx , %ebx\n\t");
 	asm("xor %ecx , %ecx\n\t");
 	asm("xor %edx , %edx\n\t");
+    printf("CPUID(0x4fffffff) ");
 	printf("total exit count is ");
+    
 	totalExitCount();
 	asm("xor %eax , %eax\n\t");
 	asm("xor %ebx , %ebx\n\t");
 	asm("xor %ecx , %ecx\n\t");
 	asm("xor %edx , %edx\n\t");
+     printf("CPUID(0x4ffffffe) ");
 	printf("total cpu cycles spent in vmexits  ");
 	getTotalTime();
 	printf("\n");
