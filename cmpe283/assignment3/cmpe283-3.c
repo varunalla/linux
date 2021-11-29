@@ -104,9 +104,9 @@ void getCpuID()
 int main(int argc, char *argv[])
 {
 	int reason = 0;
-	if (argc == 0) {
-		getCpuID();
-	} else if (argc == 1) {
+	if (argc == 1) {
+        getCpuID();
+	} else if (argc == 2) {
 		if (sscanf(argv[1], "%i", &reason) != 1) {
 			fprintf(stderr, "argument should be integer");
 		} else {
