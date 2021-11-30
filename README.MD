@@ -220,10 +220,10 @@ CPUID(0x4ffffffd) Exit Count for the reason  10 is 230044
 CPUID(0x4ffffffc) time spent by vmm for the reason  10 is 196066914 cycles
 ```
 ## Assignment 3 answers:
-3. Comment on the frequency of exits – does the number of exits increase at a stable rate? Or are there more exits performed during certain VM operations?     Approximately how many exits does a full VM boot entail?
+3. Comment on the frequency of exits – does the number of exits increase at a stable rate? Or are there more exits performed during certain VM operations?     Approximately how many exits does a full VM boot entail?<br />
  Ans: There are more exits during the boot compared to the normal usage. 
- A Normal Boot has 1715190 exits, most of which ori
-4. Of the exit types defined in the SDM, which are the most frequent? Least?
+ A Normal Boot has 1715190 exits, most of which are i/0 operations. It is also observed the CR3 access : exit reason 28, which happens for page table walk reduces once the system boots up and everything is setup.
+4. Of the exit types defined in the SDM, which are the most frequent? Least? <br />
   Answer: I/O Instructions are the most common with basic exit reason 30.
   The least frequent calls are for MOV To Dr exit reasons
   
