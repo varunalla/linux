@@ -188,3 +188,35 @@ gcc cmpe283-2.c
 total exit count is 1847056
 total cpu cycles spent in vmexits  6373159472
 ```
+# Assignment 3:
+## Modifications to kvm files.
+1. Modified File lists from cloned linux folder
+```
+arch/x86/kvm/cpuid.c
+arch/x86/kvm/vmx/vmx.c
+```
+2. Copy the file or create it the file and copy the contents inside the qemu vm
+```
+cmpe283/assignment3/cmpe283-3.c
+```
+3. Compile the file
+```
+gcc cmpe283-3.c
+```
+4. For all exits
+```
+./a.out
+```
+```
+CPUID(0x4fffffff) total exit count is 1772688
+CPUID(0x4ffffffe) total cpu cycles spent in vmexits  6290552396
+```
+5. For details for specific reason
+```
+./a.out 10
+```
+```
+CPUID(0x4ffffffd) Exit Count for the reason  10 is 230044 
+CPUID(0x4ffffffc) time spent by vmm for the reason  10 is 196066914 cycles
+```
+
