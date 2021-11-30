@@ -5908,6 +5908,9 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 	union vmx_exit_reason exit_reason = vmx->exit_reason;
 	u32 vectoring_info = vmx->idt_vectoring_info;
 	u16 exit_handler_index;
+	if(total_exits==0){
+		pr_info("First VM Exit post module load, probably first time if new vm is run after loading\n");
+	}
 	total_exits++;
 	reason=(int)exit_reason.basic;
 	if(reason>=0&&reason<75){

@@ -1409,12 +1409,12 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 			} else {
 				//if present and implemented return exit count
 				eax = vmexitcounter[reason].vmexit_count;
-				ebx=0;
-				ecx=0;
-				edx=0;
+				ebx=1;
+				ecx=1;
+				edx=1;
 			}
-			pr_info("exits for reason %d total exits: %d\n", reason,
-				vmexitcounter[reason].vmexit_count);
+			pr_info("exits for reason %d total exits: %d isValid:%s isImplemented:%s\n", reason,
+				vmexitcounter[reason].vmexit_count,vmexitcounter[reason].isValid?"true":"false",vmexitcounter[reason].isImplemented?"true":"false");
 		} else {
 			eax = 0;
 			ecx = 0;
@@ -1450,7 +1450,7 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 					    32);
 				ecx = (u32)(vmexitcounter[reason].cycle_count &
 					    0xFFFFFFFFLL);
-				edx=0;
+				edx=1;
 			}
 			pr_info("time spent for reason %d : %lld\n", reason,
 				vmexitcounter[reason].cycle_count);
