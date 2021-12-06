@@ -220,6 +220,8 @@ CPUID(0x4ffffffd) Exit Count for the reason  10 is 230044
 CPUID(0x4ffffffc) time spent by vmm for the reason  10 is 196066914 cycles
 ```
 ## Assignment 3 answers:
+1. The assignment is done by me
+2. Steps listed above.
 3. Comment on the frequency of exits – does the number of exits increase at a stable rate? Or are there more exits performed during certain VM operations?     Approximately how many exits does a full VM boot entail?<br />
  Ans: There are more exits during the boot compared to the normal usage. 
  A Normal Boot has 1715190 exits, most of which are i/0 operations. It is also observed the CR3 access : exit reason 28, which happens for page table walk reduces once the system boots up and everything is setup.
@@ -228,3 +230,10 @@ CPUID(0x4ffffffc) time spent by vmm for the reason  10 is 196066914 cycles
   The least frequent calls are for MOV To Dr exit reasons
   
   
+## Assignment 4 answers:
+1. The assignment is done by me.
+2. The file is uploaded to cmpe283/assignment4
+  count_withept.txt -- with ept enabled
+  count_withboot_withoutept.txt -- with ept=0
+3. Some of the counts are diproportionately larger than the ones expected. The i/o exits were usually higher in normal mode. The nested vm in general was way slower to boot.
+4. The number of exits due to reason 28 increased 10 times, with ept turned off. With shadow paging enabled, it looks like the number of times the cr3 was modified was too many times. even the number of exits for i/0 requests also slightly increased when the ept is turned off.
