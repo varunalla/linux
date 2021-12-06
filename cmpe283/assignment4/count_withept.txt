@@ -1,0 +1,164 @@
+[ 1185.798576] ecx reason input: 0
+[ 1185.798581] exits for reason 0 total exits: 18 isValid:true isImplemented:true
+[ 1185.798686] ecx reason input: 1
+[ 1185.798687] exits for reason 1 total exits: 66973 isValid:true isImplemented:true
+[ 1185.798704] ecx reason input: 2
+[ 1185.798705] exits for reason 2 total exits: 0 isValid:true isImplemented:true
+[ 1185.798754] ecx reason input: 3
+[ 1185.798755] exits for reason 3 total exits: 0 isValid:true isImplemented:true
+[ 1185.798771] ecx reason input: 4
+[ 1185.798772] exits for reason 4 total exits: 0 isValid:true isImplemented:true
+[ 1185.798789] ecx reason input: 5
+[ 1185.798790] Not Implemented in kvm
+[ 1185.798791] exits for reason 5 total exits: 0 isValid:true isImplemented:false
+[ 1185.798807] ecx reason input: 6
+[ 1185.798808] Not Implemented in kvm
+[ 1185.798808] exits for reason 6 total exits: 0 isValid:true isImplemented:false
+[ 1185.798826] ecx reason input: 7
+[ 1185.798827] exits for reason 7 total exits: 23401 isValid:true isImplemented:true
+[ 1185.798848] ecx reason input: 8
+[ 1185.798850] exits for reason 8 total exits: 0 isValid:true isImplemented:true
+[ 1185.798870] ecx reason input: 9
+[ 1185.798871] exits for reason 9 total exits: 0 isValid:true isImplemented:true
+[ 1185.798893] ecx reason input: a
+[ 1185.798894] exits for reason 10 total exits: 269247 isValid:true isImplemented:true
+[ 1185.798914] ecx reason input: b
+[ 1185.798915] Not Implemented in kvm
+[ 1185.798916] exits for reason 11 total exits: 0 isValid:true isImplemented:false
+[ 1185.798934] ecx reason input: c
+[ 1185.798936] exits for reason 12 total exits: 244391 isValid:true isImplemented:true
+[ 1185.798956] ecx reason input: d
+[ 1185.798957] exits for reason 13 total exits: 0 isValid:true isImplemented:true
+[ 1185.798976] ecx reason input: e
+[ 1185.798978] exits for reason 14 total exits: 0 isValid:true isImplemented:true
+[ 1185.798998] ecx reason input: f
+[ 1185.799000] exits for reason 15 total exits: 0 isValid:true isImplemented:true
+[ 1185.799019] ecx reason input: 10
+[ 1185.799021] exits for reason 16 total exits: 0 isValid:true isImplemented:true
+[ 1185.799041] ecx reason input: 11
+[ 1185.799042] Not Implemented in kvm
+[ 1185.799043] exits for reason 17 total exits: 0 isValid:true isImplemented:false
+[ 1185.799062] ecx reason input: 12
+[ 1185.799064] exits for reason 18 total exits: 0 isValid:true isImplemented:true
+[ 1185.799085] ecx reason input: 13
+[ 1185.799087] exits for reason 19 total exits: 0 isValid:true isImplemented:true
+[ 1185.799107] ecx reason input: 14
+[ 1185.799109] exits for reason 20 total exits: 0 isValid:true isImplemented:true
+[ 1185.799129] ecx reason input: 15
+[ 1185.799130] exits for reason 21 total exits: 0 isValid:true isImplemented:true
+[ 1185.799150] ecx reason input: 16
+[ 1185.799151] exits for reason 22 total exits: 0 isValid:true isImplemented:true
+[ 1185.799171] ecx reason input: 17
+[ 1185.799173] exits for reason 23 total exits: 0 isValid:true isImplemented:true
+[ 1185.799190] ecx reason input: 18
+[ 1185.799191] exits for reason 24 total exits: 0 isValid:true isImplemented:true
+[ 1185.799207] ecx reason input: 19
+[ 1185.799208] exits for reason 25 total exits: 0 isValid:true isImplemented:true
+[ 1185.799224] ecx reason input: 1a
+[ 1185.799225] exits for reason 26 total exits: 0 isValid:true isImplemented:true
+[ 1185.799242] ecx reason input: 1b
+[ 1185.799243] exits for reason 27 total exits: 0 isValid:true isImplemented:true
+[ 1185.799259] ecx reason input: 1c
+[ 1185.799260] exits for reason 28 total exits: 455783 isValid:true isImplemented:true
+[ 1185.799276] ecx reason input: 1d
+[ 1185.799278] exits for reason 29 total exits: 16 isValid:true isImplemented:true
+[ 1185.799294] ecx reason input: 1e
+[ 1185.799295] exits for reason 30 total exits: 2061542 isValid:true isImplemented:true
+[ 1185.799311] ecx reason input: 1f
+[ 1185.799312] exits for reason 31 total exits: 8619 isValid:true isImplemented:true
+[ 1185.799330] ecx reason input: 20
+[ 1185.799331] exits for reason 32 total exits: 413550 isValid:true isImplemented:true
+[ 1185.799347] ecx reason input: 21
+[ 1185.799349] exits for reason 33 total exits: 0 isValid:true isImplemented:true
+[ 1185.799365] ecx reason input: 22
+[ 1185.799366] exits for reason 34 total exits: 0 isValid:true isImplemented:true
+[ 1185.799382] ecx reason input: 23
+[ 1185.799383] Not Valid SDM reason in range but not valid ffffffff
+[ 1185.799384] exits for reason 35 total exits: 0 isValid:false isImplemented:false
+[ 1185.799399] ecx reason input: 24
+[ 1185.799401] exits for reason 36 total exits: 0 isValid:true isImplemented:true
+[ 1185.799417] ecx reason input: 25
+[ 1185.799418] exits for reason 37 total exits: 0 isValid:true isImplemented:true
+[ 1185.799434] ecx reason input: 26
+[ 1185.799435] Not Valid SDM reason in range but not valid ffffffff
+[ 1185.799436] exits for reason 38 total exits: 0 isValid:false isImplemented:false
+[ 1185.799451] ecx reason input: 27
+[ 1185.799452] exits for reason 39 total exits: 0 isValid:true isImplemented:true
+[ 1185.799468] ecx reason input: 28
+[ 1185.799470] exits for reason 40 total exits: 0 isValid:true isImplemented:true
+[ 1185.799486] ecx reason input: 29
+[ 1185.799487] exits for reason 41 total exits: 0 isValid:true isImplemented:true
+[ 1185.799503] ecx reason input: 2a
+[ 1185.799504] Not Valid SDM reason in range but not valid ffffffff
+[ 1185.799505] exits for reason 42 total exits: 0 isValid:false isImplemented:false
+[ 1185.799520] ecx reason input: 2b
+[ 1185.799522] exits for reason 43 total exits: 0 isValid:true isImplemented:true
+[ 1185.799538] ecx reason input: 2c
+[ 1185.799539] exits for reason 44 total exits: 0 isValid:true isImplemented:true
+[ 1185.799555] ecx reason input: 2d
+[ 1185.799556] exits for reason 45 total exits: 0 isValid:true isImplemented:true
+[ 1185.799572] ecx reason input: 2e
+[ 1185.799573] exits for reason 46 total exits: 0 isValid:true isImplemented:true
+[ 1185.799589] ecx reason input: 2f
+[ 1185.799591] exits for reason 47 total exits: 0 isValid:true isImplemented:true
+[ 1185.799612] ecx reason input: 30
+[ 1185.799613] exits for reason 48 total exits: 22758 isValid:true isImplemented:true
+[ 1185.799629] ecx reason input: 31
+[ 1185.799630] exits for reason 49 total exits: 387579 isValid:true isImplemented:true
+[ 1185.799646] ecx reason input: 32
+[ 1185.799648] exits for reason 50 total exits: 0 isValid:true isImplemented:true
+[ 1185.799664] ecx reason input: 33
+[ 1185.799665] exits for reason 51 total exits: 0 isValid:true isImplemented:true
+[ 1185.799681] ecx reason input: 34
+[ 1185.799682] exits for reason 52 total exits: 0 isValid:true isImplemented:true
+[ 1185.799699] ecx reason input: 35
+[ 1185.799700] exits for reason 53 total exits: 0 isValid:true isImplemented:true
+[ 1185.799717] ecx reason input: 36
+[ 1185.799718] exits for reason 54 total exits: 56 isValid:true isImplemented:true
+[ 1185.799735] ecx reason input: 37
+[ 1185.799736] exits for reason 55 total exits: 0 isValid:true isImplemented:true
+[ 1185.799753] ecx reason input: 38
+[ 1185.799754] exits for reason 56 total exits: 0 isValid:true isImplemented:true
+[ 1185.799770] ecx reason input: 39
+[ 1185.799771] exits for reason 57 total exits: 0 isValid:true isImplemented:true
+[ 1185.799788] ecx reason input: 3a
+[ 1185.799789] exits for reason 58 total exits: 0 isValid:true isImplemented:true
+[ 1185.799805] ecx reason input: 3b
+[ 1185.799806] exits for reason 59 total exits: 0 isValid:true isImplemented:true
+[ 1185.799822] ecx reason input: 3c
+[ 1185.799823] exits for reason 60 total exits: 0 isValid:true isImplemented:true
+[ 1185.799840] ecx reason input: 3d
+[ 1185.799841] exits for reason 61 total exits: 0 isValid:true isImplemented:true
+[ 1185.799857] ecx reason input: 3e
+[ 1185.799858] exits for reason 62 total exits: 0 isValid:true isImplemented:true
+[ 1185.799875] ecx reason input: 3f
+[ 1185.799876] exits for reason 63 total exits: 0 isValid:true isImplemented:true
+[ 1185.799896] ecx reason input: 40
+[ 1185.799897] exits for reason 64 total exits: 0 isValid:true isImplemented:true
+[ 1185.799913] ecx reason input: 41
+[ 1185.799914] Not Valid SDM reason in range but not valid ffffffff
+[ 1185.799915] exits for reason 65 total exits: 0 isValid:false isImplemented:false
+[ 1185.799931] ecx reason input: 42
+[ 1185.799932] Not Implemented in kvm
+[ 1185.799933] exits for reason 66 total exits: 0 isValid:true isImplemented:false
+[ 1185.799948] ecx reason input: 43
+[ 1185.799949] exits for reason 67 total exits: 0 isValid:true isImplemented:true
+[ 1185.799965] ecx reason input: 44
+[ 1185.799967] exits for reason 68 total exits: 0 isValid:true isImplemented:true
+[ 1185.799983] ecx reason input: 45
+[ 1185.799984] Not Implemented in kvm
+[ 1185.799984] exits for reason 69 total exits: 0 isValid:true isImplemented:false
+[ 1185.800000] ecx reason input: 46
+[ 1185.800001] Not Valid SDM reason in range but not valid ffffffff
+[ 1185.800002] exits for reason 70 total exits: 0 isValid:false isImplemented:false
+[ 1185.800018] ecx reason input: 47
+[ 1185.800019] Not Valid SDM reason in range but not valid ffffffff
+[ 1185.800019] exits for reason 71 total exits: 0 isValid:false isImplemented:false
+[ 1185.800035] ecx reason input: 48
+[ 1185.800036] Not Valid SDM reason in range but not valid ffffffff
+[ 1185.800037] exits for reason 72 total exits: 0 isValid:false isImplemented:false
+[ 1185.800053] ecx reason input: 49
+[ 1185.800054] Not Valid SDM reason in range but not valid ffffffff
+[ 1185.800054] exits for reason 73 total exits: 0 isValid:false isImplemented:false
+[ 1185.800070] ecx reason input: 4a
+[ 1185.800072] exits for reason 74 total exits: 0 isValid:true isImplemented:true
